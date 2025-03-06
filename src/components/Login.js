@@ -8,10 +8,9 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Simulate login logic
     if (username === 'admin' && password === 'password') {
       localStorage.setItem('isLoggedIn', 'true');
-      navigate('/dashboard');
+      navigate('/dashboard/orders');
     } else {
       alert('Invalid credentials');
     }

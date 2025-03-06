@@ -24,22 +24,22 @@ const Products = () => {
     setEditingProduct(null);
   };
   // Fetch products on component mount
-  React.useEffect(() => {
-    const fetchProducts = async () => {
-      const products = await getProducts();
-      setProducts(products);
-      // Set the first product as the selected product
-      setSelectedProduct(products[0]);
-    };
-    fetchProducts();
-  }, []);
+  // React.useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     const products = await getProducts();
+  //     setProducts(products);
+  //     // Set the first product as the selected product
+  //     setSelectedProduct(products[0]);
+  //   };
+  //   fetchProducts();
+  // }, []);
 
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Products</h2>
       <button
         onClick={() => setIsAddingProduct(true)}
-        className="flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+        className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
       >
         <MdAdd /> Add Product
       </button>
@@ -60,6 +60,7 @@ const Products = () => {
         <thead>
           <tr>
             <th className="py-2 px-4 border-b">S No</th>
+            <th className="py-2 px-4 border-b">Category</th>
             <th className="py-2 px-4 border-b">Image</th>
             <th className="py-2 px-4 border-b">Name</th>
             <th className="py-2 px-4 border-b">Price</th>
@@ -68,9 +69,10 @@ const Products = () => {
           </tr>
         </thead>
         <tbody>
-          {products.map((product, index) => (
+          {products ? products.map((product, index) => (
             <tr key={product.id}>
               <td className="py-2 px-4 border-b">{index + 1}</td>
+              <td className="py-2 px-4 border-b">{product.id}</td>
               <td className="py-2 px-4 border-b">
                 <img
                   src={product.image} // Assuming product has an `image` field
@@ -90,7 +92,8 @@ const Products = () => {
                 </button>
               </td>
             </tr>
-          ))}
+          ))
+        : null}
         </tbody>
       </table>
 
