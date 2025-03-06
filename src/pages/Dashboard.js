@@ -14,7 +14,6 @@ const Dashboard = () => {
         <div className="p-6">
           <OrdersTable />
         </div>
-    
       </div>
     </div>
   );
