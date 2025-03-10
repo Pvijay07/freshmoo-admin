@@ -23,6 +23,10 @@ const Products = () => {
     );
     setEditingProduct(null);
   };
+  const handleDeleteProduct=()=>{
+    setProducts(products.filter(product=>product.id!==selectedProduct.id))
+    
+  }
   // Fetch products on component mount
   // React.useEffect(() => {
   //   const fetchProducts = async () => {
@@ -35,88 +39,65 @@ const Products = () => {
   // }, []);
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Products</h2>
-      <button
-        onClick={() => setIsAddingProduct(true)}
-        className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
-      >
-        <MdAdd /> Add Product
-      </button>
-      {isAddingProduct && (
-        <ProductForm
-          onSubmit={handleAddProduct}
-          onCancel={() => setIsAddingProduct(false)}
-        />
-      )}
-      {editingProduct && (
-        <ProductForm
-          product={editingProduct}
-          onSubmit={handleEditProduct}
-          onCancel={() => setEditingProduct(null)}
-        />
-      )}
-      <table className="min-w-full bg-white border border-gray-300">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 border-b">S No</th>
-            <th className="py-2 px-4 border-b">Category</th>
-            <th className="py-2 px-4 border-b">Image</th>
-            <th className="py-2 px-4 border-b">Name</th>
-            <th className="py-2 px-4 border-b">Price</th>
-            <th className="py-2 px-4 border-b">Description</th>
-            <th className="py-2 px-4 border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products ? products.map((product, index) => (
-            <tr key={product.id}>
-              <td className="py-2 px-4 border-b">{index + 1}</td>
-              <td className="py-2 px-4 border-b">{product.id}</td>
-              <td className="py-2 px-4 border-b">
-                <img
-                  src={product.image} // Assuming product has an `image` field
-                  alt={product.name}
-                  className="w-10 h-10 object-cover"
-                />
-              </td>
-              <td className="py-2 px-4 border-b">{product.name}</td>
-              <td className="py-2 px-4 border-b">₹{product.price}</td>
-              <td className="py-2 px-4 border-b">{product.description}</td>
-              <td className="py-2 px-4 border-b">
-                <button className="text-blue-500 hover:text-blue-700 mr-2">
-                  <MdEdit />
-                </button>
-                <button className="text-red-500 hover:text-red-700">
-                  <MdDelete />
-                </button>
-              </td>
-            </tr>
-          ))
-        : null}
-        </tbody>
-      </table>
-
-      {/* Display selected product details */}
-      {selectedProduct && (
-        <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-          <h3 className="text-lg font-bold">{selectedProduct.name}</h3>
-          <p>Price: ₹{selectedProduct.price}</p>
-          <p>Description: {selectedProduct.description}</p>
-          <img
-            src={selectedProduct.image}
-            alt={selectedProduct.name}
-            className="w-20 h-20 object-cover mt-2"
-          />
-          <button
-            onClick={() => setSelectedProduct(null)}
-            className="mt-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-          >
-            Close
-          </button>
+ 
+        <div className='bg-white rounded-lg shadow'>
+          {/* Header section */}
+          <div className='p-6 border-b border-gray-200 flex justify-between items-center'>
+            <h1 className='text-xl font-semibold text-gray-800'>Products</h1>
+            <button
+              onClick={() => setIsAddingProduct(true)}
+              className='flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600'
+            >
+              <MdAdd className='mr-2' /> Add Product
+            </button>
+          </div>
+          {/* Table section */}
+          <div className='overflow-x-auto'>
+            <table className='min-w-full divide-y divide-gray-200'>
+              <thead className='bg-gray-50'>
+                <tr>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>S No</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Category</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Image</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Name</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Price</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Description</th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Actions</th>
+                </tr>
+              </thead>
+              <tbody className='bg-white divide-y divide-gray-200'>
+                {products.map((product, index) => (
+                  <tr key={product.id} className='hover:bg-gray-50'>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>{index + 1}</td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>{product.category}</td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm'>
+                      <img src={product.image} alt={product.name} className='w-10 h-10 object-cover rounded' />
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>{product.name}</td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>₹{product.price}</td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{product.description}</td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                      <button
+                        onClick={() => handleEditProduct(product)}
+                        className='text-blue-500 hover:text-blue-700 mr-2'
+                      >
+                        <MdEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className='text-red-500 hover:text-red-700'
+                      >
+                        <MdDelete />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      )}
-    </div>
+ 
+    
   );
 };
 

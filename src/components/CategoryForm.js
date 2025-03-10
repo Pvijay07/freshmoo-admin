@@ -20,6 +20,7 @@ const CategoryForm = ({ category, onSubmit, onCancel }) => {
           <input
             type="text"
             value={name}
+            name='category'
             onChange={(e) => setName(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-lg"
             placeholder="Category Name"
@@ -30,6 +31,7 @@ const CategoryForm = ({ category, onSubmit, onCancel }) => {
           <label className="block text-sm font-medium mb-2">Description</label>
           <textarea
             value={description}
+            name='description'
             onChange={(e) => setDescription(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-lg"
             placeholder="Category Description"

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: "http://your-api-url.com",
+export const api = axios.create({
+  baseURL: "https://app.freshmoo.in/api/",
 });
 
 export const login = async (username, password) => {
@@ -18,7 +18,7 @@ export const login = async (username, password) => {
 
 export const getProducts = async () => {
   try {
-    const response = await api.get("/api/getProducts");
+    const response = await api.get("/admin/getProducts");
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -28,7 +28,7 @@ export const getProducts = async () => {
 
 export const getProduct = async (id) => {
   try {
-    const response = await api.get(`/api/getProduct/${id}`);
+    const response = await api.get(`/admin/getProduct/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching product:", error);
@@ -38,7 +38,7 @@ export const getProduct = async (id) => {
 
 export const createProduct = async (product) => {
   try {
-    const response = await api.post("/api/createProduct", product);
+    const response = await api.post("/admin/createProduct", product);
     return response.data;
   } catch (error) {
     console.error("Error creating product:", error);
@@ -48,7 +48,7 @@ export const createProduct = async (product) => {
 
 export const updateProduct = async (id, product) => {
   try {
-    const response = await api.put(`/api/updateProduct/${id}`, product);
+    const response = await api.put(`/admin/updateProduct/${id}`, product);
     return response.data;
   } catch (error) {
     console.error("Error updating product:", error);
@@ -58,7 +58,7 @@ export const updateProduct = async (id, product) => {
 
 export const deleteProduct = async (id) => {
   try {
-    const response = await api.delete(`/api/deleteProduct/${id}`);
+    const response = await api.delete(`/admin/deleteProduct/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -68,7 +68,7 @@ export const deleteProduct = async (id) => {
 
 export const getProductsByCategory = async (category) => {
   try {
-    const response = await api.get(`/api/getProductsByCategory/${category}`);
+    const response = await api.get(`/admin/getProductsByCategory/${category}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching products by category:", error);
@@ -78,7 +78,7 @@ export const getProductsByCategory = async (category) => {
 
 export const createCategory = async () => {
   try {
-    const response = await api.post("/api/createCategory");
+    const response = await api.post("/admin/createCategory");
     return response.data;
   } catch (error) {
     console.error("Error creating category:", error);
@@ -88,7 +88,7 @@ export const createCategory = async () => {
 
 export const updateCategory = async (id, category) => {
   try {
-    const response = await api.put(`/api/updateCategory/${id}`, category);
+    const response = await api.put(`/admin/updateCategory/${id}`, category);
     return response.data;
   } catch (error) {
     console.error("Error updating category:", error);
@@ -98,7 +98,7 @@ export const updateCategory = async (id, category) => {
 
 export const deleteCategory = async (id) => {
   try {
-    const response = await api.delete(`/api/deleteCategory/${id}`);
+    const response = await api.delete(`/admin/deleteCategory/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting category:", error);
@@ -108,7 +108,16 @@ export const deleteCategory = async (id) => {
 
 export const getOrders = async () => {
   try {
-    const response = await api.get("/api/orders");
+    const response = await api.get("/admin/orders");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    throw error;
+  }
+};
+export const getCategories = async () => {
+  try {
+    const response = await api.get("/admin/categories");
     return response.data;
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -118,7 +127,7 @@ export const getOrders = async () => {
 
 export const getUsers = async () => {
   try {
-    const response = await api.get("/api/users");
+    const response = await api.get("/admin/customers");
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -128,7 +137,7 @@ export const getUsers = async () => {
 
 export const getDeliveryPartners = async () => {
   try {
-    const response = await api.get("/api/deliveryPartners");
+    const response = await api.get("/admin/deliveryPartners");
     return response.data;
   } catch (error) {
     console.error("Error fetching delivery partners:", error);
@@ -151,7 +160,7 @@ export const updateDeliveryPartner = async (id, deliveryPartner) => {
 
 export const updateOrder = async (id, order) => {
   try {
-    const response = await api.put(`/api/updateOrder/${id}`, order);
+    const response = await api.put(`/admin/updateOrder/${id}`, order);
     return response.data;
   } catch (error) {
     console.error("Error updating order:", error);
@@ -161,7 +170,7 @@ export const updateOrder = async (id, order) => {
 
 export const updateOrderStatus = async (id, status) => {
   try {
-    const response = await api.put(`/api/updateOrderStatus/${id}`, status);
+    const response = await api.put(`/admin/updateOrderStatus/${id}`, status);
     return response.data;
   } catch (error) {
     console.error("Error updating order status:", error);
@@ -171,7 +180,7 @@ export const updateOrderStatus = async (id, status) => {
 
 export const getbanners = async () => {
   try {
-    const response = await api.get("/api/banners");
+    const response = await api.get("/admin/banners");
     return response.data;
   } catch (error) {
     console.error("Error fetching banners:", error);
@@ -181,7 +190,7 @@ export const getbanners = async () => {
 
 export const createBanner = async () => {
   try {
-    const response = await api.post("/api/createBanner");
+    const response = await api.post("/admin/createBanner");
     return response.data;
   } catch (error) {
     console.error("Error creating banner:", error);
@@ -191,7 +200,7 @@ export const createBanner = async () => {
 
 export const updateBanner = async (id, banner) => {
   try {
-    const response = await api.put(`/api/updateBanner/${id}`, banner);
+    const response = await api.put(`/admin/updateBanner/${id}`, banner);
     return response.data;
   } catch (error) {
     console.error("Error updating banner:", error);
@@ -201,7 +210,7 @@ export const updateBanner = async (id, banner) => {
 
 export const deleteBanner = async (id) => {
   try {
-    const response = await api.delete(`/api/deleteBanner/${id}`);
+    const response = await api.delete(`/admin/deleteBanner/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting banner:", error);
@@ -211,7 +220,7 @@ export const deleteBanner = async (id) => {
 
 export const getCoupons = async () => {
   try {
-    const response = await api.get("/api/coupons");
+    const response = await api.get("/admin/coupons");
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -221,7 +230,7 @@ export const getCoupons = async () => {
 
 export const createCoupon = async () => {
   try {
-    const response = await api.get("/api/createCoupon");
+    const response = await api.get("/admin/createCoupon");
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -231,7 +240,7 @@ export const createCoupon = async () => {
 
 export const updateCoupon = async (id, coupon) => {
   try {
-    const response = await api.get(`/api/updateCoupon/${id}`, coupon);
+    const response = await api.get(`/admin/updateCoupon/${id}`, coupon);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -241,7 +250,7 @@ export const updateCoupon = async (id, coupon) => {
 
 export const deleteCoupon = async (id) => {
   try {
-    const response = await api.delete(`/api/deleteCoupon/${id}`);
+    const response = await api.delete(`/admin/deleteCoupon/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);

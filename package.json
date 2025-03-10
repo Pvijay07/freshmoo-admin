@@ -1,6 +1,6 @@
 {
   "name": "freshmoo",
-  "homepage": "https://freshmoo.in/admin/",
+  "homepage": "https://admin.freshmoo.in/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

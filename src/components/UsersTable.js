@@ -1,24 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AssignOrderModal from "./AssignOrderModal";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { ChevronDown, ChevronUp, MoreHorizontal, Search } from "lucide-react";
-
+import { api, getUsers } from "../api";
 const UsersTable = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortDirection, setSortDirection] = useState("desc");
   const [sortField, setSortField] = useState("date");
+  const [users, setUsers] = useState([]);
 
-  const users = [
-    { id: 1, customer: "John Doe", amount: 1000, status: "Pending" },
-    { id: 2, customer: "Jane Smith", amount: 1500, status: "Shipped" },
-  ];
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const data = await getUsers();
+      setUsers(data.customers);
+      setLoading(false);
+    };
 
-  const handleAssignOrder = (order) => {
-    setSelectedOrder(order);
-    setIsModalOpen(true);
-  };
+    fetchUsers();
+  }, []);
+
   // Sorting function
   const handleSort = (field) => {
     if (field === sortField) {
@@ -34,15 +35,6 @@ const UsersTable = () => {
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-xl font-semibold text-gray-800">Orders</h1>
-          {/* <div className="flex gap-2">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 text-sm font-medium flex items-center hover:bg-gray-50">
-            <Download size={16} className="mr-2" />
-            Export
-          </button>
-          <button className="px-4 py-2 bg-indigo-600 rounded-md text-white text-sm font-medium hover:bg-indigo-700">
-            Create Order
-          </button>
-        </div> */}
         </div>
       </div>
 
@@ -105,7 +97,7 @@ const UsersTable = () => {
                 onClick={() => handleSort("date")}
               >
                 <div className="flex items-center">
-                  Location
+                  Number
                   {sortField === "date" &&
                     (sortDirection === "asc" ? (
                       <ChevronUp size={16} className="ml-1" />
@@ -144,44 +136,51 @@ const UsersTable = () => {
                     ))}
                 </div>
               </th>
-              {/* <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-              >
-                <div className="flex items-center">Actions</div>
-              </th> */}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                  {order.id}
+            {loading ? (
+              <p>Loading...</p>
+            ) : users.length > 0 ? (
+              users.map(
+                (
+                  user // ✅ Removed extra `{}` around map()
+                ) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                      {user.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.name ?? ""}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {user.email ?? ""}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.number}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {user.status ?? ""}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.created_at).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                  </tr>
+                )
+              )
+            ) : (
+              <tr>
+                <td colSpan="5" className="px-6 py-4 text-center">
+                  No users found.
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {order.customer}
-                  </div>
-                  <div className="text-sm text-gray-500">{order.email}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(order.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap"></td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.items}
-                </td>
-                {/* <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button className="text-gray-400 hover:text-gray-500">
-                    <MoreHorizontal size={18} />
-                  </button>
-                </td> */}
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
