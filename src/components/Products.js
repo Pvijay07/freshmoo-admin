@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { getProducts } from "../api";
+
 import { MdAdd, MdEdit, MdDelete } from "react-icons/md";
 import ProductForm from "./ProductForm";
-
+import {
+  createProduct,
+  deleteProduct,
+  getProducts,
+  updateProduct,
+} from "../api";
 const Products = () => {
   const [products, setProducts] = React.useState([]);
   const [selectedProduct, setSelectedProduct] = React.useState(null);
@@ -15,89 +20,159 @@ const Products = () => {
     setIsAddingProduct(false);
   };
 
-  const handleEditProduct = (updatedProduct) => {
-    setProducts(
-      products.map((product) =>
-        product.id === updatedProduct.id ? updatedProduct : product
-      )
-    );
-    setEditingProduct(null);
+  React.useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getProducts();
+      setProducts(data.products);
+      // Set the first product as the selected product
+      setSelectedProduct(products[0]);
+    };
+    fetchProducts();
+  }, []);
+  // Create a new category
+  const handleCreate = async (newProduct) => {
+    try {
+      console.log(newProduct);
+      const createdProduct = await createProduct(newProduct); 
+      // setProducts([...products, createdProduct]);
+      setProducts((prevCategories) => [...prevCategories, newProduct]);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error("Error creating product:", error);
+    }
   };
-  const handleDeleteProduct=()=>{
-    setProducts(products.filter(product=>product.id!==selectedProduct.id))
-    
-  }
-  // Fetch products on component mount
-  // React.useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     const products = await getProducts();
-  //     setProducts(products);
-  //     // Set the first product as the selected product
-  //     setSelectedProduct(products[0]);
-  //   };
-  //   fetchProducts();
-  // }, []);
+
+  // Update existing category
+  const handleEditProduct = async (product) => {
+    try {
+      const updateProduct = await updateProduct(product.id, product);
+      setProducts((prevProducts) =>
+        prevProducts.map((c) => (c.id === product.id ? product : c))
+      );
+      setEditingProduct(null);
+    } catch (error) {
+      console.error("Error updating category:", error);
+    }
+  };
+
+  // Delete category
+  const handleDeleteProduct = async (id) => {
+    try {
+      await deleteProduct(id);
+      setProducts((prevProducts) =>
+        prevProducts.filter((category) => category.id !== id)
+      );
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
+  };
 
   return (
- 
-        <div className='bg-white rounded-lg shadow'>
-          {/* Header section */}
-          <div className='p-6 border-b border-gray-200 flex justify-between items-center'>
-            <h1 className='text-xl font-semibold text-gray-800'>Products</h1>
-            <button
-              onClick={() => setIsAddingProduct(true)}
-              className='flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600'
-            >
-              <MdAdd className='mr-2' /> Add Product
-            </button>
-          </div>
-          {/* Table section */}
-          <div className='overflow-x-auto'>
-            <table className='min-w-full divide-y divide-gray-200'>
-              <thead className='bg-gray-50'>
-                <tr>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>S No</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Category</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Image</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Name</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Price</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Description</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Actions</th>
+    <div className="bg-white rounded-lg shadow">
+      {/* Header section */}
+      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-gray-800">Products</h1>
+        <button
+          onClick={() => setEditingProduct(true)}
+          className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+        >
+          <MdAdd className="mr-2" /> Add Product
+        </button>
+      </div>
+      {/* Form for Create/Edit */}
+      {editingProduct && (
+        <ProductForm
+          product={editingProduct}
+          onCancel={() => setEditingProduct(null)}
+          onSubmit={(product) =>
+            product.id ? handleEditProduct(product) : handleCreate(product)
+          }
+        />
+      )}
+      {/* Table section */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                S No
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Image
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Price
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Description
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {products.length > 0  ? (
+              products.map((product, index) => (
+                <tr key={product.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.category}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-10 h-10 object-cover rounded"
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ₹{product.price}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {product.description}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => setEditingProduct(product)}
+                      className="text-blue-500 hover:text-blue-700 mr-2"
+                    >
+                      <MdEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <MdDelete />
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className='bg-white divide-y divide-gray-200'>
-                {products.map((product, index) => (
-                  <tr key={product.id} className='hover:bg-gray-50'>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>{index + 1}</td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>{product.category}</td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm'>
-                      <img src={product.image} alt={product.name} className='w-10 h-10 object-cover rounded' />
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>{product.name}</td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>₹{product.price}</td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{product.description}</td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
-                      <button
-                        onClick={() => handleEditProduct(product)}
-                        className='text-blue-500 hover:text-blue-700 mr-2'
-                      >
-                        <MdEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className='text-red-500 hover:text-red-700'
-                      >
-                        <MdDelete />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
- 
-    
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="7"
+                  className="px-6 py-4 whitespace-nowrap text-center"
+                >
+                  No products found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

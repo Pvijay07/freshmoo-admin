@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import CategoryForm from "./CategoryForm";
 import { MdAdd } from "react-icons/md";
-import { deleteCategory, getCategories, updateCategory, createCategory } from "../api"; // Ensure createCategory is imported
+import {
+  deleteCategory,
+  getCategories,
+  updateCategory,
+  createCategory,
+} from "../api"; // Ensure createCategory is imported
 
 const CategoriesTable = () => {
   const [categories, setCategories] = useState([]);
@@ -24,9 +29,9 @@ const CategoriesTable = () => {
   // Create a new category
   const handleCreate = async (newCategory) => {
     try {
-      console.log(newCategory)
+      console.log(newCategory);
       const createdCategory = await createCategory(newCategory);
-      setCategories((prevCategories) => [...prevCategories, createdCategory]);
+      setCategories((prevCategories) => [...prevCategories, newCategory]);
       setEditingCategory(null);
     } catch (error) {
       console.error("Error creating category:", error);
@@ -36,9 +41,9 @@ const CategoriesTable = () => {
   // Update existing category
   const handleSave = async (category) => {
     try {
-      const updatedCategory = await updateCategory(category);
+      const updatedCategory = await updateCategory(category.id ,category);
       setCategories((prevCategories) =>
-        prevCategories.map((c) => (c.id === category.id ? updatedCategory : c))
+        prevCategories.map((c) => (c.id === category.id ? category : c))
       );
       setEditingCategory(null);
     } catch (error) {
@@ -103,10 +108,10 @@ const CategoriesTable = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {categories.length > 0 ? (
-              categories.map((category) => (
+              categories.map((category, index) => (
                 <tr key={category.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {category.id}
+                    {index + 1} {/* Use index + 1 for numbering */}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {category.name}
@@ -132,7 +137,10 @@ const CategoriesTable = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="px-6 py-4 whitespace-nowrap text-center">
+                <td
+                  colSpan="4"
+                  className="px-6 py-4 whitespace-nowrap text-center"
+                >
                   No categories found.
                 </td>
               </tr>

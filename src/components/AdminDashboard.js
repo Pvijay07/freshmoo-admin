@@ -69,32 +69,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Topbar */}
-        <div className="bg-white shadow-sm p-4 flex justify-between items-center">
-          <div className="flex items-center w-64 rounded-md bg-gray-100 px-3 py-2">
-            <Search size={18} className="text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="bg-transparent border-none ml-2 focus:outline-none w-full"
-            />
-          </div>
-          <div className="flex items-center">
-            <button className="p-2 rounded-full hover:bg-gray-100 relative">
-              <Bell size={20} />
-              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-            </button>
-            <div className="ml-4 flex items-center">
-              <img
-                src="/api/placeholder/32/32"
-                alt="User avatar"
-                className="w-8 h-8 rounded-full"
-              />
-              <span className="ml-2 font-medium hidden md:block">
-                Admin User
-              </span>
-            </div>
-          </div>
-        </div>
+        
 
         {/* Dashboard Content */}
         <div className="p-6">

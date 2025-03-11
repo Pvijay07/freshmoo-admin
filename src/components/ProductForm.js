@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getCategories } from "../api";
 
 const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [name, setName] = useState(product ? product.name : "");
@@ -7,18 +8,33 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     product ? product.description : ""
   );
 
+  const [categories, setCategories] = useState([]);
+  const [category, setCategory] = useState([]);
+console.log(product)
   useEffect(() => {
     if (product) {
       setName(product.name);
       setPrice(product.price);
       setDescription(product.description);
+      setCategory(product.category_id);
     }
   }, [product]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, price, description });
+    onSubmit({ name, price, description ,category});
   };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -26,6 +42,22 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
         {product ? "Edit Product" : "Add Product"}
       </h2>
       <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            required
+          >
+            <option value="">Select a Category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Name</label>
           <input
@@ -48,6 +80,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             required
           />
         </div>
+
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Description</label>
           <textarea
@@ -80,4 +113,3 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
 };
 
 export default ProductForm;
-

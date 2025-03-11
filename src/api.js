@@ -18,7 +18,7 @@ export const login = async (username, password) => {
 
 export const getProducts = async () => {
   try {
-    const response = await api.get("/admin/getProducts");
+    const response = await api.get("/admin/products");
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -76,9 +76,9 @@ export const getProductsByCategory = async (category) => {
   }
 };
 
-export const createCategory = async () => {
+export const createCategory = async (categoryData) => {
   try {
-    const response = await api.post("/admin/createCategory");
+    const response = await api.post("/admin/createCategory",categoryData);
     return response.data;
   } catch (error) {
     console.error("Error creating category:", error);
@@ -137,7 +137,7 @@ export const getUsers = async () => {
 
 export const getDeliveryPartners = async () => {
   try {
-    const response = await api.get("/admin/deliveryPartners");
+    const response = await api.get("/admin/partners");
     return response.data;
   } catch (error) {
     console.error("Error fetching delivery partners:", error);
