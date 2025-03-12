@@ -7,23 +7,35 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [description, setDescription] = useState(
     product ? product.description : ""
   );
-
+  const [image, setImage] = useState(product ? product.image : "");
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState([]);
-console.log(product)
+  console.log(product);
   useEffect(() => {
     if (product) {
       setName(product.name);
       setPrice(product.price);
       setDescription(product.description);
       setCategory(product.category_id);
+      setImage(product.image);
     }
   }, [product]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, price, description ,category});
+  
+    const formData = new FormData();
+    formData.append("category", category);
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("description", description);
+    if (image) {
+      formData.append("file", image);  // ✅ Append the file correctly
+    }
+  
+    onSubmit(formData);
   };
+  
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -80,7 +92,15 @@ console.log(product)
             required
           />
         </div>
-
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Images</label>
+          <input
+            type="file"
+            onChange={(e) => setImage(e.target.files[0])} // ✅ Capture the file correctly
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            accept="image/*"
+          />
+        </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Description</label>
           <textarea

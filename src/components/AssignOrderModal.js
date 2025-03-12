@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getDeliveryPartners } from '../api';
 
 const AssignOrderModal = ({ order, onClose }) => {
-  const deliveryPartners = [
-    { id: 1, name: 'Partner A' },
-    { id: 2, name: 'Partner B' },
-  ];
+    const [deliveryPartners, setDeliveryPartners] = useState([]);
+  
+  useEffect(() => {
+     const fetchUsers = async () => {
+       const data = await getDeliveryPartners();
+       setDeliveryPartners(data.partners);
+     };
+     fetchUsers();
+   }, []);
 
   const handleAssign = (partnerId) => {
     console.log(`Order ${order.id} assigned to Partner ${partnerId}`);

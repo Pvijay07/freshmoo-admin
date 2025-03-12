@@ -94,11 +94,41 @@ const UsersTable = () => {
               <th
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("customer")}
+              >
+                <div className="flex items-center">
+                  Email
+                  {sortField === "customer" &&
+                    (sortDirection === "asc" ? (
+                      <ChevronUp size={16} className="ml-1" />
+                    ) : (
+                      <ChevronDown size={16} className="ml-1" />
+                    ))}
+                </div>
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                 onClick={() => handleSort("date")}
               >
                 <div className="flex items-center">
                   Number
                   {sortField === "date" &&
+                    (sortDirection === "asc" ? (
+                      <ChevronUp size={16} className="ml-1" />
+                    ) : (
+                      <ChevronDown size={16} className="ml-1" />
+                    ))}
+                </div>
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("gender")}
+              >
+                <div className="flex items-center">
+                  Gender
+                  {sortField === "status" &&
                     (sortDirection === "asc" ? (
                       <ChevronUp size={16} className="ml-1" />
                     ) : (
@@ -154,12 +184,16 @@ const UsersTable = () => {
                       <div className="text-sm font-medium text-gray-900">
                         {user.name ?? ""}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      
+                    </td>
+                    <div className="text-sm text-gray-500">
                         {user.email ?? ""}
                       </div>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.number}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.gender}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {user.status ?? ""}

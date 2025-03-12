@@ -1,27 +1,13 @@
-import React, { useState } from "react";
 import {
-  Bell,
   ShoppingCart,
   Package,
   Users,
-  DollarSign,
   TrendingUp,
-  Search,
 } from "lucide-react";
+import { FaRupeeSign } from "react-icons/fa";
 
 const AdminDashboard = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  // Mock data for the dashboard
-  const salesData = [
-    { name: "Jan", value: 4000 },
-    { name: "Feb", value: 3000 },
-    { name: "Mar", value: 5000 },
-    { name: "Apr", value: 7000 },
-    { name: "May", value: 6000 },
-    { name: "Jun", value: 8000 },
-  ];
-
+  
   const recentOrders = [
     {
       id: "#ORD-001",
@@ -53,24 +39,14 @@ const AdminDashboard = () => {
     },
   ];
 
-  const topProducts = [
-    { name: "Wireless Earbuds", sales: 324, stock: 45 },
-    { name: "Smart Watch", sales: 276, stock: 18 },
-    { name: "Bluetooth Speaker", sales: 253, stock: 32 },
-    { name: "Phone Case", sales: 198, stock: 112 },
-  ];
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+ 
 
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Topbar */}
-        
-
+      
         {/* Dashboard Content */}
         <div className="p-6">
           <h2 className="text-2xl font-semibold mb-6">Dashboard Overview</h2>
@@ -79,7 +55,7 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <div className="bg-white rounded-lg shadow p-4 flex items-center">
               <div className="rounded-full bg-blue-100 p-3 mr-4">
-                <DollarSign size={24} className="text-blue-600" />
+                <FaRupeeSign size={24} className="text-blue-600" />
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Total Revenue</p>

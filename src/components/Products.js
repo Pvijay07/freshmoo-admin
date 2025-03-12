@@ -30,12 +30,22 @@ const Products = () => {
     fetchProducts();
   }, []);
   // Create a new category
-  const handleCreate = async (newProduct) => {
+  const handleCreate = async (formData) => {
     try {
-      console.log(newProduct);
-      const createdProduct = await createProduct(newProduct); 
-      // setProducts([...products, createdProduct]);
-      setProducts((prevCategories) => [...prevCategories, newProduct]);
+      const response = await fetch(
+        "https://app.freshmoo.in/api/admin/createProduct",
+        {
+          method: "POST",
+          body: formData, // ✅ Let the browser set the Content-Type automatically
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to create product");
+
+      const data = await response.json();
+      console.log("Product Created:", data);
+
+      setProducts((prevProducts) => [...prevProducts, data.product]);
       setEditingProduct(null);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -118,7 +128,7 @@ const Products = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products.length > 0  ? (
+            {products.length > 0 ? (
               products.map((product, index) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">

@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart, ShoppingCart, Package, Users, Menu, X} from 'lucide-react'
+import { BarChart, ShoppingCart, Package, Users, Menu, X } from 'lucide-react'
 
-import { FaTruck, FaList, FaTags, FaTicketAlt, FaImage} from 'react-icons/fa'
+import { FaTruck, FaList, FaTags, FaTicketAlt, FaImage } from 'react-icons/fa'
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -15,6 +15,7 @@ const Sidebar = () => {
     <div className={`bg-indigo-800 text-white ${
         isSidebarOpen ? "w-64" : "w-20"
       } transition-all duration-300 flex-shrink-0 md:block`}>
+
       <div className='p-4 flex items-center justify-between'>
         {isSidebarOpen && <h1 className='text-xl font-bold'>FreshMoo</h1>}
         <button onClick={toggleSidebar} className='p-1 rounded-md hover:bg-indigo-700'>
