@@ -78,7 +78,7 @@ export const getProductsByCategory = async (category) => {
 
 export const createCategory = async (categoryData) => {
   try {
-    const response = await api.post("/admin/createCategory",categoryData);
+    const response = await api.post("/admin/createCategory", categoryData);
     return response.data;
   } catch (error) {
     console.error("Error creating category:", error);
@@ -251,6 +251,44 @@ export const updateCoupon = async (id, coupon) => {
 export const deleteCoupon = async (id) => {
   try {
     const response = await api.delete(`/admin/deleteCoupon/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+
+export const getOffers = async () => {
+  try {
+    const response = await api.get("/admin/offers");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching offers:", error);
+    throw error;
+  }
+};
+
+export const createOffer = async (offer) => {
+  try {
+    const response = await api.post(`/admin/createOffer`,offer);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+export const updateOffer = async (id, offer) => {
+  try {
+    const response = await api.put(`/admin/updateOffer/${id}`,offer);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+export const deleteOffer = async (id) => {
+  try {
+    const response = await api.delete(`/admin/deleteOffer/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);

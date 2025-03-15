@@ -19,6 +19,18 @@ const UsersTable = () => {
 
     fetchUsers();
   }, []);
+  const filteredOrders = orders
+  .filter((order) => {
+    const matchesSearch =
+      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // const matchesStatus =
+    //   filterStatus === "All" || order.status === filterStatus;
+
+    return matchesSearch;
+  })
 
   // Sorting function
   const handleSort = (field) => {
@@ -48,7 +60,7 @@ const UsersTable = () => {
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Search orders..."
+              placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -180,15 +192,12 @@ const UsersTable = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                       {user.id}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {user.name ?? ""}
-                      </div>
-                      
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.name ?? ""}
                     </td>
-                    <div className="text-sm text-gray-500">
-                        {user.email ?? ""}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.email ?? ""}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.number}
                     </td>

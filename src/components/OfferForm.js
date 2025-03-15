@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { format } from "date-fns";
 
 const OfferForm = ({ offer, onSubmit, onCancel }) => {
   const [name, setName] = useState(offer ? offer.name : '');
@@ -7,7 +8,7 @@ const OfferForm = ({ offer, onSubmit, onCancel }) => {
   const [startDate, setStartDate] = useState(offer ? offer.start_date : '');
   const [endDate, setEndDate] = useState(offer ? offer.end_date : '');
   const [isActive, setIsActive] = useState(offer ? offer.is_active : true);
-
+console.log(offer)
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({
@@ -64,7 +65,7 @@ const OfferForm = ({ offer, onSubmit, onCancel }) => {
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => setStartDate(format(new Date(e.target.value), "yyyy-MM-dd"))}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           />
@@ -74,7 +75,8 @@ const OfferForm = ({ offer, onSubmit, onCancel }) => {
           <input
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => setEndDate(format(new Date(e.target.value), "yyyy-MM-dd"))}
+
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           />
