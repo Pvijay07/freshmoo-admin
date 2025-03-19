@@ -10,7 +10,6 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [image, setImage] = useState(product ? product.image : "");
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState([]);
-  console.log(product);
   useEffect(() => {
     if (product) {
       setName(product.name);
@@ -20,22 +19,27 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       setImage(product.image);
     }
   }, [product]);
-
+  const [images, setImages] = useState([]);
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files); // Convert FileList to Array
+    setImages(selectedFiles);
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+    console.log(images);
     const formData = new FormData();
+    formData.append("id", product?.id);
     formData.append("category", category);
     formData.append("name", name);
     formData.append("price", price);
     formData.append("description", description);
-    if (image) {
-      formData.append("file", image);  // ✅ Append the file correctly
-    }
-  
+    // Append multiple images correctly
+    images.forEach((file, index) => {
+      formData.append(`files`, file); // Use array notation for multiple files
+    });
     onSubmit(formData);
   };
-  
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -96,9 +100,10 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
           <label className="block text-sm font-medium mb-2">Images</label>
           <input
             type="file"
-            onChange={(e) => setImage(e.target.files[0])} // ✅ Capture the file correctly
+            onChange={handleImageChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
             accept="image/*"
+            multiple
           />
         </div>
         <div className="mb-4">

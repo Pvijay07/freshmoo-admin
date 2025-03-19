@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   Filter,
@@ -11,139 +11,32 @@ import {
   Truck,
   XCircle,
 } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
+import { getDeliveryPartners, getOrders } from "../api";
+import { BsQuestionCircle } from "react-icons/bs";
+import AssigneeDropdown from "./AssignOrderModal";
+import axios from "axios";
 const OrdersTable = () => {
   const [sortField, setSortField] = useState("date");
   const [sortDirection, setSortDirection] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [orders, setOrders] = useState([]);
+const [assignees,setAssignees]=useState([])
   const ordersPerPage = 10;
+  React.useEffect(() => {
+    // Mock data for the orders
+    const fetchOrders = async () => {
+      const data = await getOrders();
+      console.log(data.orders);
+      setOrders(data.orders);
+    };
+    fetchOrders();
+  }, []);
 
-  // Mock data for the orders
-  const orders = [
-    {
-      id: "#ORD-5783",
-      customer: "John Doe",
-      email: "john.doe@example.com",
-      date: "2025-03-05",
-      status: "Delivered",
-      payment: "Credit Card",
-      amount: "$120.00",
-      items: 3,
-    },
-    {
-      id: "#ORD-5782",
-      customer: "Jane Smith",
-      email: "jane.smith@example.com",
-      date: "2025-03-04",
-      status: "Processing",
-      payment: "PayPal",
-      amount: "$85.50",
-      items: 1,
-    },
-    {
-      id: "#ORD-5781",
-      customer: "Mike Johnson",
-      email: "mike.j@example.com",
-      date: "2025-03-03",
-      status: "Shipped",
-      payment: "Credit Card",
-      amount: "$210.75",
-      items: 4,
-    },
-    {
-      id: "#ORD-5780",
-      customer: "Sarah Williams",
-      email: "sarah.w@example.com",
-      date: "2025-03-02",
-      status: "Pending",
-      payment: "Bank Transfer",
-      amount: "$65.25",
-      items: 2,
-    },
-    {
-      id: "#ORD-5779",
-      customer: "Robert Brown",
-      email: "robert.b@example.com",
-      date: "2025-03-01",
-      status: "Delivered",
-      payment: "Credit Card",
-      amount: "$142.30",
-      items: 3,
-    },
-    {
-      id: "#ORD-5778",
-      customer: "Emily Davis",
-      email: "emily.d@example.com",
-      date: "2025-02-28",
-      status: "Cancelled",
-      payment: "PayPal",
-      amount: "$95.00",
-      items: 2,
-    },
-    {
-      id: "#ORD-5777",
-      customer: "Alex Johnson",
-      email: "alex.j@example.com",
-      date: "2025-02-27",
-      status: "Delivered",
-      payment: "Credit Card",
-      amount: "$178.50",
-      items: 5,
-    },
-    {
-      id: "#ORD-5776",
-      customer: "Lisa Anderson",
-      email: "lisa.a@example.com",
-      date: "2025-02-26",
-      status: "Processing",
-      payment: "Apple Pay",
-      amount: "$45.99",
-      items: 1,
-    },
-    {
-      id: "#ORD-5775",
-      customer: "Thomas Wilson",
-      email: "thomas.w@example.com",
-      date: "2025-02-25",
-      status: "Shipped",
-      payment: "Credit Card",
-      amount: "$332.45",
-      items: 7,
-    },
-    {
-      id: "#ORD-5774",
-      customer: "Jennifer Lopez",
-      email: "jennifer.l@example.com",
-      date: "2025-02-24",
-      status: "Delivered",
-      payment: "PayPal",
-      amount: "$89.99",
-      items: 2,
-    },
-    {
-      id: "#ORD-5773",
-      customer: "David Miller",
-      email: "david.m@example.com",
-      date: "2025-02-23",
-      status: "Pending",
-      payment: "Bank Transfer",
-      amount: "$126.75",
-      items: 3,
-    },
-    {
-      id: "#ORD-5772",
-      customer: "Rebecca White",
-      email: "rebecca.w@example.com",
-      date: "2025-02-22",
-      status: "Delivered",
-      payment: "Credit Card",
-      amount: "$74.50",
-      items: 2,
-    },
-  ];
-
+  // const orders=[]
   // Status options for filtering
   const statusOptions = [
     "All",
@@ -168,7 +61,6 @@ const OrdersTable = () => {
   const filteredOrders = orders
     .filter((order) => {
       const matchesSearch =
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.email.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -241,17 +133,37 @@ const OrdersTable = () => {
       },
     };
 
-    const config = statusConfig[status];
+    // Ensure the status exists in the config, otherwise use a default fallback
+    const config = statusConfig[status] || {
+      bg: "bg-gray-100",
+      text: "text-gray-800",
+      icon: <BsQuestionCircle size={14} className="mr-1" />, // Use a default icon
+    };
 
     return (
       <span
         className={`px-2 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${config.bg} ${config.text}`}
       >
         {config.icon}
-        {status}
+        {status || "Unknown"}
       </span>
     );
   };
+
+  const generateRandomId = (orderId) => {
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `#FrMo${orderId}${randomNum}`;
+  };
+ 
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const data = await getDeliveryPartners();
+      console.log(data)
+      setAssignees(data.partners);
+    };
+    fetchUsers();
+  }, []);
 
   return (
     <div className="bg-white rounded-lg shadow">
@@ -414,8 +326,11 @@ const OrdersTable = () => {
                     ))}
                 </div>
               </th>
-              <th scope="col" className="relative px-6 py-3">
-                <span className="sr-only">Actions</span>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+              >
+                <div className="flex items-center">Assignee</div>
               </th>
             </tr>
           </thead>
@@ -423,7 +338,7 @@ const OrdersTable = () => {
             {currentOrders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                  {order.id}
+                  {generateRandomId(order.id)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
@@ -432,7 +347,7 @@ const OrdersTable = () => {
                   <div className="text-sm text-gray-500">{order.email}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(order.date).toLocaleDateString("en-US", {
+                  {new Date(order.order_date).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
@@ -442,19 +357,18 @@ const OrdersTable = () => {
                   <StatusBadge status={order.status} />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.payment}
+                  {order.payment ?? ""}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {order.amount}
+                  {order.total_amount}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.items}
+                  {order.item_count}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button className="text-gray-400 hover:text-gray-500">
-                    <MoreHorizontal size={18} />
-                  </button>
-                </td>
+                <AssigneeDropdown
+                  assignees={assignees}
+                  orderId={order.id}
+                />
               </tr>
             ))}
           </tbody>

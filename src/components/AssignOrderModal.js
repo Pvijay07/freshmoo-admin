@@ -1,48 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import { getDeliveryPartners } from '../api';
+import { useState } from "react";
+import { MoreHorizontal, Check } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { assignOrder } from "../api";
 
-const AssignOrderModal = ({ order, onClose }) => {
-    const [deliveryPartners, setDeliveryPartners] = useState([]);
-  
-  useEffect(() => {
-     const fetchUsers = async () => {
-       const data = await getDeliveryPartners();
-       setDeliveryPartners(data.partners);
-     };
-     fetchUsers();
-   }, []);
+const AssigneeDropdown = ({ assignees, orderId  }) => {
+  const [selectedAssignee, setSelectedAssignee] = useState(null);
 
-  const handleAssign = (partnerId) => {
-    console.log(`Order ${order.id} assigned to Partner ${partnerId}`);
-    onClose();
-  };
+  const handleAssign = async (assignee, orderId) => {
+    try {
+      const response = await assignOrder(assignee, orderId)
+
+      if (response.data.success) {
+        console.log("Successfully assigned to:", assignee.name);
+        alert(`Assigned to ${assignee.name}`);
+      } else {
+        console.error("Assignment failed:", response.data.message);
+      }
+    } catch (error) {
+      console.error("API Error:", error.response?.data || error.message);
+    }
+  };;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg">
-        <h2 className="text-xl font-bold mb-4">Assign Order #{order.id}</h2>
-        <p className="mb-4">Select a delivery partner:</p>
-        <ul>
-          {deliveryPartners.map((partner) => (
-            <li key={partner.id} className="mb-2">
-              <button
-                onClick={() => handleAssign(partner.id)}
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button className="text-gray-400 hover:text-gray-500 focus:outline-none">
+            <MoreHorizontal size={18} />
+          </button>
+        </DropdownMenu.Trigger>
+
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content className="bg-white shadow-md border rounded-md p-2 w-40">
+            {assignees.map((assignee) => (
+              <DropdownMenu.Item
+                key={assignee.id}
+                onClick={() => handleAssign(assignee, orderId)}
+                className="flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
-                {partner.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-        <button
-          onClick={onClose}
-          className="mt-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-        >
-          Close
-        </button>
-      </div>
-    </div>
+                {assignee.name ?? assignee.number}
+              </DropdownMenu.Item>
+            ))}
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
+    </td>
   );
 };
 
-export default AssignOrderModal;
+export default AssigneeDropdown;

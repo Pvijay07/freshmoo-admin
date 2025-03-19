@@ -17,6 +17,7 @@ const DeliveryPartnersTable = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const data = await getDeliveryPartners();
+      console.log(data)
       setDeliveryPartners(data.partners);
     };
     fetchUsers();

@@ -270,7 +270,7 @@ export const getOffers = async () => {
 
 export const createOffer = async (offer) => {
   try {
-    const response = await api.post(`/admin/createOffer`,offer);
+    const response = await api.post(`/admin/createOffer`, offer);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -279,7 +279,7 @@ export const createOffer = async (offer) => {
 };
 export const updateOffer = async (id, offer) => {
   try {
-    const response = await api.put(`/admin/updateOffer/${id}`,offer);
+    const response = await api.put(`/admin/updateOffer/${id}`, offer);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -289,6 +289,16 @@ export const updateOffer = async (id, offer) => {
 export const deleteOffer = async (id) => {
   try {
     const response = await api.delete(`/admin/deleteOffer/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+
+export const assignOrder = async (assignee, orderId) => {
+  try {
+    const response = await api.put(`/admin/assignOrder/${orderId}`, assignee);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);

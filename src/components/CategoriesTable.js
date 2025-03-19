@@ -30,7 +30,7 @@ const CategoriesTable = () => {
   const handleCreate = async (newCategory) => {
     try {
       console.log(newCategory);
-      const createdCategory = await createCategory(newCategory);
+      await createCategory(newCategory);
       setCategories((prevCategories) => [...prevCategories, newCategory]);
       setEditingCategory(null);
     } catch (error) {
@@ -39,11 +39,12 @@ const CategoriesTable = () => {
   };
 
   // Update existing category
-  const handleSave = async (category) => {
+  const handleSave = async (category,categoryId) => {
+    console.log(categoryId)
     try {
-      const updatedCategory = await updateCategory(category.id ,category);
+      await updateCategory(categoryId, category);
       setCategories((prevCategories) =>
-        prevCategories.map((c) => (c.id === category.id ? category : c))
+        prevCategories.map((c) => (c.id === categoryId ? category : c))
       );
       setEditingCategory(null);
     } catch (error) {
@@ -82,7 +83,7 @@ const CategoriesTable = () => {
           category={editingCategory}
           onCancel={() => setEditingCategory(null)}
           onSubmit={(category) =>
-            category.id ? handleSave(category) : handleCreate(category)
+            editingCategory.id ? handleSave(category,editingCategory.id) : handleCreate(category)
           }
         />
       )}
@@ -97,6 +98,9 @@ const CategoriesTable = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Image
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Description
@@ -115,6 +119,13 @@ const CategoriesTable = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {category.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <img
+                      src={`http://app.freshmoo.in/uploads/${category.images}`}
+                      alt={category.name}
+                      className="w-10 h-10 object-cover rounded"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {category.description}

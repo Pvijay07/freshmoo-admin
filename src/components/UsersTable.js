@@ -9,6 +9,8 @@ const UsersTable = () => {
   const [sortDirection, setSortDirection] = useState("desc");
   const [sortField, setSortField] = useState("date");
   const [users, setUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 10;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -19,19 +21,23 @@ const UsersTable = () => {
 
     fetchUsers();
   }, []);
-  const filteredOrders = orders
-  .filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // const matchesStatus =
-    //   filterStatus === "All" || order.status === filterStatus;
+  const filteredOrders = users.filter((user) => {
+    const matchesSearch =
+      // user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesSearch;
-  })
-
+  });
+  // Pagination
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
   // Sorting function
   const handleSort = (field) => {
     if (field === sortField) {
@@ -184,7 +190,7 @@ const UsersTable = () => {
             {loading ? (
               <p>Loading...</p>
             ) : users.length > 0 ? (
-              users.map(
+              currentOrders.map(
                 (
                   user // ✅ Removed extra `{}` around map()
                 ) => (
@@ -226,6 +232,46 @@ const UsersTable = () => {
             )}
           </tbody>
         </table>
+      </div>
+      {/* Pagination section */}
+      <div className="px-6 py-4 bg-white border-t border-gray-200">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing <span className="font-medium">{indexOfFirstOrder + 1}</span>{" "}
+            to{" "}
+            <span className="font-medium">
+              {Math.min(indexOfLastOrder, filteredOrders.length)}
+            </span>{" "}
+            of <span className="font-medium">{filteredOrders.length}</span>{" "}
+            orders
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 border rounded-md text-sm ${
+                currentPage === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Previous
+            </button>
+            <button
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 border rounded-md text-sm ${
+                currentPage === totalPages
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

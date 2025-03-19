@@ -10,7 +10,7 @@ const Login = () => {
     e.preventDefault();
     if (username === 'admin' && password === 'password') {
       localStorage.setItem('isLoggedIn', 'true');
-      navigate('/dashboard/orders');
+      navigate('/dashboard');
     } else {
       alert('Invalid credentials');
     }
