@@ -152,7 +152,7 @@ const [assignees,setAssignees]=useState([])
 
   const generateRandomId = (orderId) => {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `#FrMo${orderId}${randomNum}`;
+    return `#FrMo${orderId}`;
   };
  
 

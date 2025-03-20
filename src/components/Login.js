@@ -8,7 +8,7 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'password') {
+    if (username === 'Freshmoo' && password === 'Freshmoo@0501') {
       localStorage.setItem('isLoggedIn', 'true');
       navigate('/dashboard');
     } else {

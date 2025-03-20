@@ -13,17 +13,19 @@ const DeliveryPartnersTable = () => {
   const [isDeletingConfirmed, setIsDeletingConfirmed] = useState(false);
   const [isDeletingConfirmedPartner, setIsDeletingConfirmedPartner] =
     useState(false);
+  const [selectedPartner, setSelectedPartner] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
       const data = await getDeliveryPartners();
-      console.log(data)
       setDeliveryPartners(data.partners);
     };
     fetchUsers();
   }, []);
 
-
+  const handleViewDocuments = (partner) => {
+    setSelectedPartner(partner);
+  };
   return (
     <div className="bg-white rounded-lg shadow">
       {/* Header section */}
@@ -53,6 +55,9 @@ const DeliveryPartnersTable = () => {
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Documents
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -76,6 +81,13 @@ const DeliveryPartnersTable = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {partner.status}
                   </td>
+                  <td
+                    className="px-6 py-4 whitespace-nowrap text-sm text-blue-500 cursor-pointer hover:underline"
+                    onClick={() => handleViewDocuments(partner)}
+                  >
+                    View
+                  </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button className="text-blue-500 hover:text-blue-700 mr-2">
                       <MdEdit />
@@ -95,6 +107,31 @@ const DeliveryPartnersTable = () => {
             )}
           </tbody>
         </table>
+        {selectedPartner && (
+          <div className="mt-4 p-4 border rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold">
+              Documents for {selectedPartner.name}
+            </h3>
+            <ul className="list-disc pl-5">
+              {selectedPartner.documents.length > 0 ? (
+                selectedPartner.documents.map((doc, index) => (
+                  <li key={index}>
+                    <a
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      {doc.name}
+                    </a>
+                  </li>
+                ))
+              ) : (
+                <p>No documents available</p>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

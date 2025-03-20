@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import BannerForm from './BannerForm';
-import { MdAdd } from 'react-icons/md';
+import React, { useState, useEffect } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import BannerForm from "./BannerForm";
+import { MdAdd } from "react-icons/md";
+import { createBanner, deleteBanner, getbanners, updateBanner } from "../api";
 
 const BannersTable = () => {
   const [banners, setBanners] = useState([]);
@@ -13,32 +14,56 @@ const BannersTable = () => {
 
   const fetchBanners = async () => {
     try {
-      const response = await fetch('/api/banners');
-      const data = await response.json();
-      setBanners(data);
+      const response = await getbanners();
+      setBanners(response.banners);
     } catch (error) {
-      console.error('Error fetching banners:', error);
+      console.error("Error fetching banners:", error);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+      await deleteBanner(id);
       fetchBanners(); // Refresh the list
     } catch (error) {
-      console.error('Error deleting banner:', error);
+      console.error("Error deleting banner:", error);
     }
   };
 
+  const handleSave = async (banner, bannerId) => {
+    try {
+      await updateBanner(bannerId, banner);
+      setBanners((prevCategories) =>
+        prevCategories.map((c) => (c.id === bannerId ? banner : c))
+      );
+      setEditingBanner(null);
+    } catch (error) {
+      console.error("Error updating banner:", error);
+    }
+  };
+
+  const handleCreate = async (banner) => {
+    try {
+      await createBanner(banner);
+      // setBanners(data);
+      setBanners((prevBanners) => [...prevBanners, banner]);
+
+      setEditingBanner(null);
+    } catch (error) {
+      console.error("Error creating banner:", error);
+    }
+  };
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Banners</h2>
-      <button
-        onClick={() => setEditingBanner({})}
-        className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
-      >
-        <MdAdd />Add Banner
-      </button>
+    <div className="bg-white rounded-lg shadow">
+      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-gray-800">Banners</h1>
+        <button
+          onClick={() => setEditingBanner(true)}
+          className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+        >
+          <MdAdd className="mr-2" /> Add Banner
+        </button>
+      </div>
       {editingBanner && (
         <BannerForm
           banner={editingBanner}
@@ -46,14 +71,10 @@ const BannersTable = () => {
           onSubmit={(updatedBanner) => {
             if (updatedBanner.id) {
               // Update existing banner
-              setBanners(
-                banners.map((banner) =>
-                  banner.id === updatedBanner.id ? updatedBanner : banner
-                )
-              );
+              handleSave(updatedBanner, editingBanner.id);
             } else {
               // Add new banner
-              setBanners([...banners, updatedBanner]);
+              handleCreate(updatedBanner);
             }
             setEditingBanner(null);
           }}
@@ -62,25 +83,53 @@ const BannersTable = () => {
       <table className="min-w-full bg-white rounded-lg shadow">
         <thead>
           <tr>
-            <th className="py-2 px-4 border-b">ID</th>
-            <th className="py-2 px-4 border-b">Title</th>
-            <th className="py-2 px-4 border-b">Image</th>
-            <th className="py-2 px-4 border-b">Link</th>
-            <th className="py-2 px-4 border-b">Status</th>
-            <th className="py-2 px-4 border-b">Actions</th>
+          <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >S No</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Title</th>
+            <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Image</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Link</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Status</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Actions</th>
           </tr>
         </thead>
         <tbody>
-          {banners.map((banner) => (
+          {banners.map((banner, index) => (
             <tr key={banner.id}>
-              <td className="py-2 px-4 border-b">{banner.id}</td>
+              <td className="py-2 px-4 border-b">{index + 1}</td>
               <td className="py-2 px-4 border-b">{banner.title}</td>
               <td className="py-2 px-4 border-b">
-                <img src={banner.image_url} alt={banner.title} className="w-16 h-16 object-cover" />
+                <img
+                  src={banner.image_url}
+                  alt={banner.title}
+                  className="w-16 h-16 object-cover"
+                />
               </td>
               <td className="py-2 px-4 border-b">{banner.link}</td>
               <td className="py-2 px-4 border-b">
-                {banner.is_active ? 'Active' : 'Inactive'}
+                {banner.is_active ? "Active" : "Inactive"}
               </td>
               <td className="py-2 px-4 border-b">
                 <button

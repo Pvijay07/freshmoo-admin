@@ -188,9 +188,9 @@ export const getbanners = async () => {
   }
 };
 
-export const createBanner = async () => {
+export const createBanner = async ( banner) => {
   try {
-    const response = await api.post("/admin/createBanner");
+    const response = await api.post("/admin/createBanner", banner);
     return response.data;
   } catch (error) {
     console.error("Error creating banner:", error);
@@ -228,9 +228,9 @@ export const getCoupons = async () => {
   }
 };
 
-export const createCoupon = async () => {
+export const createCoupon = async ( coupon) => {
   try {
-    const response = await api.get("/admin/createCoupon");
+    const response = await api.post("/admin/createCoupon", coupon);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -240,7 +240,7 @@ export const createCoupon = async () => {
 
 export const updateCoupon = async (id, coupon) => {
   try {
-    const response = await api.get(`/admin/updateCoupon/${id}`, coupon);
+    const response = await api.put(`/admin/updateCoupon/${id}`, coupon);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
@@ -299,6 +299,16 @@ export const deleteOffer = async (id) => {
 export const assignOrder = async (assignee, orderId) => {
   try {
     const response = await api.put(`/admin/assignOrder/${orderId}`, assignee);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+
+export const getOrderAssignee = async (orderId) => {
+  try {
+    const response = await api.get("/admin/getOrderAssignee/" + orderId);
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);

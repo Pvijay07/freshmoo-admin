@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import CouponForm from './CouponForm';
-import { MdAdd } from 'react-icons/md';
+import React, { useState, useEffect } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import CouponForm from "./CouponForm";
+import { MdAdd } from "react-icons/md";
+import { createCoupon, deleteCoupon, getCoupons, updateCoupon } from "../api";
 
 const CouponsTable = () => {
   const [coupons, setCoupons] = useState([]);
@@ -13,32 +14,55 @@ const CouponsTable = () => {
 
   const fetchCoupons = async () => {
     try {
-      const response = await fetch('/api/coupons');
-      const data = await response.json();
-      setCoupons(data);
+      const response = await getCoupons()
+      setCoupons(response.coupons);
     } catch (error) {
-      console.error('Error fetching coupons:', error);
+      console.error("Error fetching coupons:", error);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`/api/coupons/${id}`, { method: 'DELETE' });
+      await deleteCoupon(id);
       fetchCoupons(); // Refresh the list
     } catch (error) {
-      console.error('Error deleting coupon:', error);
+      console.error("Error deleting coupon:", error);
+    }
+  };
+  const handleSave = async (coupon, couponId) => {
+    try {
+      await updateCoupon(couponId, coupon);
+      setCoupons((prevCategories) =>
+        prevCategories.map((c) => (c.id === couponId ? coupon : c))
+      );
+      setEditingCoupon(null);
+    } catch (error) {
+      console.error("Error updating coupon:", error);
     }
   };
 
+  const handleCreate = async (coupon) => {
+    try {
+      await createCoupon(coupon);
+      setCoupons((prevBanners) => [...prevBanners, coupon]);
+
+      setEditingCoupon(null);
+    } catch (error) {
+      console.error("Error creating coupon:", error);
+    }
+  };
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Coupons</h2>
-      <button
-        onClick={() => setEditingCoupon({})}
-        className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
-      >
-       <MdAdd /> Add Coupon
-      </button>
+    <div className="bg-white rounded-lg shadow">
+      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-gray-800">Coupons</h1>{" "}
+        <button
+          onClick={() => setEditingCoupon({})}
+          className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-green-600"
+        >
+          <MdAdd /> Add Coupon
+        </button>
+      </div>
+
       {editingCoupon && (
         <CouponForm
           coupon={editingCoupon}
@@ -46,29 +70,54 @@ const CouponsTable = () => {
           onSubmit={(updatedCoupon) => {
             if (updatedCoupon.id) {
               // Update existing coupon
-              setCoupons(
-                coupons.map((coupon) =>
-                  coupon.id === updatedCoupon.id ? updatedCoupon : coupon
-                )
-              );
+              handleSave(updatedCoupon, editingCoupon.id);
             } else {
               // Add new coupon
-              setCoupons([...coupons, updatedCoupon]);
+              handleCreate(updatedCoupon);
             }
             setEditingCoupon(null);
           }}
         />
       )}
-      <table className="min-w-full bg-white rounded-lg shadow">
-        <thead>
+     <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
           <tr>
-            <th className="py-2 px-4 border-b">ID</th>
-            <th className="py-2 px-4 border-b">Code</th>
-            <th className="py-2 px-4 border-b">Discount</th>
-            <th className="py-2 px-4 border-b">Type</th>
-            <th className="py-2 px-4 border-b">Min Order</th>
-            <th className="py-2 px-4 border-b">Status</th>
-            <th className="py-2 px-4 border-b">Actions</th>
+            <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >S No</th>
+            <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Code</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Discount</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Type</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Min Order</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Status</th>
+             <th 
+            scope="col"
+
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            >Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -80,7 +129,7 @@ const CouponsTable = () => {
               <td className="py-2 px-4 border-b">{coupon.discount_type}</td>
               <td className="py-2 px-4 border-b">{coupon.min_order_amount}</td>
               <td className="py-2 px-4 border-b">
-                {coupon.is_active ? 'Active' : 'Inactive'}
+                {coupon.is_active ? "Active" : "Inactive"}
               </td>
               <td className="py-2 px-4 border-b">
                 <button
@@ -100,6 +149,8 @@ const CouponsTable = () => {
           ))}
         </tbody>
       </table>
+    </div>
+
     </div>
   );
 };

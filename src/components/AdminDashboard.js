@@ -1,52 +1,46 @@
-import {
-  ShoppingCart,
-  Package,
-  Users,
-  TrendingUp,
-} from "lucide-react";
+import { ShoppingCart, Package, Users, TrendingUp } from "lucide-react";
 import { FaRupeeSign } from "react-icons/fa";
+import { getOrders, getProducts, getUsers } from "../api";
+import React from "react";
 
 const AdminDashboard = () => {
-  
-  const recentOrders = [
-    {
-      id: "#ORD-001",
-      customer: "John Doe",
-      date: "2025-03-05",
-      status: "Delivered",
-      amount: "$120.00",
-    },
-    {
-      id: "#ORD-002",
-      customer: "Jane Smith",
-      date: "2025-03-04",
-      status: "Processing",
-      amount: "$85.50",
-    },
-    {
-      id: "#ORD-003",
-      customer: "Mike Johnson",
-      date: "2025-03-03",
-      status: "Shipped",
-      amount: "$210.75",
-    },
-    {
-      id: "#ORD-004",
-      customer: "Sarah Williams",
-      date: "2025-03-02",
-      status: "Pending",
-      amount: "$65.25",
-    },
-  ];
+  const [orders, setOrders] = React.useState([]);
+  const [products, setProducts] = React.useState([]);
+  const [users, setUsers] = React.useState([]);
 
- 
+  React.useEffect(() => {
+    // Mock data for the orders
+    const fetchOrders = async () => {
+      const data = await getOrders();
+      console.log(data.orders);
+      setOrders(data.orders);
+    };
+    fetchOrders();
+  }, []);
+  React.useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getProducts();
+      setProducts(data.products);
+      // Set the first product as the selected product
+      // setSelectedProduct(products[0]);
+    };
+    fetchProducts();
+  }, []);
 
+  React.useEffect(() => {
+    const fetchUsers = async () => {
+      const data = await getUsers();
+      setUsers(data.customers);
+    };
+
+    fetchUsers();
+  }, []);
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Topbar */}
-      
+
         {/* Dashboard Content */}
         <div className="p-6">
           <h2 className="text-2xl font-semibold mb-6">Dashboard Overview</h2>
@@ -59,9 +53,15 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Total Revenue</p>
-                <p className="text-2xl font-bold">₹24,780</p>
+                <p className="text-2xl font-bold">
+                  ₹ 
+                  {orders.reduce(
+                    (acc, order) => acc + parseFloat(order.total_amount || 0),
+                    0
+                  )}
+                </p>{" "}
                 <p className="text-green-500 text-sm flex items-center">
-                  <TrendingUp size={16} className="mr-1" /> +12.4%
+                  {/* <TrendingUp size={16} className="mr-1" /> +12.4% */}
                 </p>
               </div>
             </div>
@@ -72,9 +72,11 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Total Orders</p>
-                <p className="text-2xl font-bold">1,482</p>
+                <p className="text-2xl font-bold">
+                  {orders ? orders.length : 0}
+                </p>
                 <p className="text-green-500 text-sm flex items-center">
-                  <TrendingUp size={16} className="mr-1" /> +8.2%
+                  {/* <TrendingUp size={16} className="mr-1" /> +8.2% */}
                 </p>
               </div>
             </div>
@@ -85,9 +87,11 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Products</p>
-                <p className="text-2xl font-bold">432</p>
+                <p className="text-2xl font-bold">
+                  {products ? products.length : 0}
+                </p>
                 <p className="text-green-500 text-sm flex items-center">
-                  <TrendingUp size={16} className="mr-1" /> +4.7%
+                  {/* <TrendingUp size={16} className="mr-1" /> +4.7% */}
                 </p>
               </div>
             </div>
@@ -98,9 +102,9 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Customers</p>
-                <p className="text-2xl font-bold">3,254</p>
+                <p className="text-2xl font-bold">{users ? users.length : 0}</p>
                 <p className="text-green-500 text-sm flex items-center">
-                  <TrendingUp size={16} className="mr-1" /> +14.6%
+                  {/* <TrendingUp size={16} className="mr-1" /> +14.6% */}
                 </p>
               </div>
             </div>
@@ -132,11 +136,11 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {recentOrders.map((order, index) => (
+                  {orders.map((order, index) => (
                     <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-blue-600">
-                          {order.id}
+                          #FrMo{order.id}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -146,7 +150,7 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
-                          {order.date}
+                          {order.order_date}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -166,7 +170,7 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {order.amount}
+                        {order.total_amount}
                       </td>
                     </tr>
                   ))}
