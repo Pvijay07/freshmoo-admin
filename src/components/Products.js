@@ -91,9 +91,9 @@ const Products = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white rounded-lg shadow overflow-hidden">
       {/* Header section */}
-      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+      <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-xl font-semibold text-gray-800">Products</h1>
         <button
           onClick={() => setEditingProduct(true)}

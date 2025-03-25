@@ -117,12 +117,12 @@ const DeliveryPartnersTable = () => {
                 selectedPartner.documents.map((doc, index) => (
                   <li key={index}>
                     <a
-                      href={doc.url}
+                      href={`https://app.freshmoo.in${doc.document_url}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 underline"
                     >
-                      {doc.name}
+                      {doc.document_type}
                     </a>
                   </li>
                 ))
