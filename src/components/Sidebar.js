@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BarChart, ShoppingCart, Package, Users, Menu, X } from 'lucide-react'
 
-import { FaTruck, FaList, FaTags, FaTicketAlt, FaImage } from 'react-icons/fa'
+import { FaTruck, FaList, FaTags, FaTicketAlt, FaImage, FaExchangeAlt, FaChartBar } from 'react-icons/fa'
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -12,12 +12,12 @@ const Sidebar = () => {
   }
 
   return (
-    <div className={`bg-indigo-800 text-white ${
+    <div className={`bg-indigo-700 text-white backdrop-blur-sm ${
         isSidebarOpen ? "w-64" : "w-20"
       } transition-all duration-300 flex-shrink-0 md:block`}>
 
       <div className='p-4 flex items-center justify-between'>
-        {isSidebarOpen && <h1 className='text-xl font-bold'>FreshMoo</h1>}
+        {isSidebarOpen && <h1 className='text-xl font-bold'>Gowmoo</h1>}
         <button onClick={toggleSidebar} className='p-1 rounded-md hover:bg-indigo-700'>
           {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -77,6 +77,25 @@ const Sidebar = () => {
           {isSidebarOpen && <span className='ml-4'>Banners</span>}
           </Link>
         </li>
+      <li className='mb-4'>
+  <Link
+    to='/dashboard/transactions'
+    className='px-4 py-3 flex items-center text-indigo-300 hover:bg-indigo-700 hover:text-white cursor-pointer transition-colors'
+  >
+    <FaExchangeAlt className='mr-2' /> 
+    {isSidebarOpen && <span className='ml-4'>Transactions</span>}
+  </Link>
+</li>
+
+<li className='mb-4'>
+  <Link
+    to='/dashboard/reports'
+    className='px-4 py-3 flex items-center text-indigo-300 hover:bg-indigo-700 hover:text-white cursor-pointer transition-colors'
+  >
+    <FaChartBar className='mr-2' />
+    {isSidebarOpen && <span className='ml-4'>Reports</span>}
+  </Link>
+</li>
       </ul>
     </div>
   )

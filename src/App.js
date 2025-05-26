@@ -21,6 +21,8 @@ import AdminDashboard from "./components/AdminDashboard";
 import Footer from "./components/Footer"; // Adjust the import path as needed
 import CustomerPrivacyPolicy from "./components/CustomerPrivacyPolicy";
 import DeliveryPartnerPrivacyPolicy from "./components/DeliveryPartnerPrivacyPolicy";
+import TransactionsTable from "./components/TransactionsTable";
+import ReportsDashboard from "./components/ReportsDashboard";
 const App = () => {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
@@ -45,6 +47,9 @@ const App = () => {
               <Route path="/dashboard/offers" element={<Offers />} />
               <Route path="/dashboard/coupons" element={<Coupons />} />
               <Route path="/dashboard/banners" element={<Banners />} />
+              <Route path="/dashboard/transactions" element={<TransactionsTable />} />
+              <Route path="/dashboard/reports" element={<ReportsDashboard />} />
+
             </Route>
              <Route
               path="/privacy/customer"
