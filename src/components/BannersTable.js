@@ -55,100 +55,114 @@ const BannersTable = () => {
   };
   return (
     <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-gray-800">Banners</h1>
+      {/* Header */}
+      <div className="p-4 md:p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <h1 className="text-lg md:text-xl font-semibold text-gray-800">
+          Banners
+        </h1>
         <button
           onClick={() => setEditingBanner(true)}
-          className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+          className="flex items-center justify-center bg-green-500 text-white px-3 py-2 md:px-4 md:py-2 text-sm md:text-base rounded-lg hover:bg-green-600"
         >
           <MdAdd className="mr-2" /> Add Banner
         </button>
       </div>
+
+      {/* Form */}
       {editingBanner && (
-        <BannerForm
-          banner={editingBanner}
-          onCancel={() => setEditingBanner(null)}
-          onSubmit={(updatedBanner) => {
-            if (updatedBanner.id) {
-              // Update existing banner
-              handleSave(updatedBanner, editingBanner.id);
-            } else {
-              // Add new banner
-              handleCreate(updatedBanner);
-            }
-            setEditingBanner(null);
-          }}
-        />
+        <div className="px-4 md:px-6 py-4">
+          <BannerForm
+            banner={editingBanner}
+            onCancel={() => setEditingBanner(null)}
+            onSubmit={(updatedBanner) => {
+              if (updatedBanner.id) {
+                handleSave(updatedBanner, editingBanner.id);
+              } else {
+                handleCreate(updatedBanner);
+              }
+              setEditingBanner(null);
+            }}
+          />
+        </div>
       )}
-      <table className="min-w-full bg-white rounded-lg shadow">
-        <thead>
-          <tr>
-          <th 
-            scope="col"
 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            >S No</th>
-             <th 
-            scope="col"
-
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            >Title</th>
-            <th 
-            scope="col"
-
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            >Image</th>
-             <th 
-            scope="col"
-
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            >Link</th>
-             <th 
-            scope="col"
-
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            >Status</th>
-             <th 
-            scope="col"
-
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            >Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {banners.map((banner, index) => (
-            <tr key={banner.id}>
-              <td className="py-2 px-4 border-b">{index + 1}</td>
-              <td className="py-2 px-4 border-b">{banner.title}</td>
-              <td className="py-2 px-4 border-b">
-                <img
-                  src={banner.image_url}
-                  alt={banner.title}
-                  className="w-16 h-16 object-cover"
-                />
-              </td>
-              <td className="py-2 px-4 border-b">{banner.link}</td>
-              <td className="py-2 px-4 border-b">
-                {banner.is_active ? "Active" : "Inactive"}
-              </td>
-              <td className="py-2 px-4 border-b">
-                <button
-                  onClick={() => setEditingBanner(banner)}
-                  className="text-blue-500 hover:text-blue-700 mr-2"
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => handleDelete(banner.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <FaTrash />
-                </button>
-              </td>
+      {/* Table with overflow for mobile */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm divide-y divide-gray-200">
+          <thead className="bg-gray-50 text-xs md:text-sm">
+            <tr>
+              <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                S No
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                Title
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                Image
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                Link
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {banners.map((banner, index) => (
+              <tr key={banner.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3 whitespace-nowrap">{index + 1}</td>
+                <td className="px-4 py-3 whitespace-nowrap">{banner.title}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex flex-wrap gap-2">
+                    {banner.images ? (
+                      JSON.parse(banner.images).map((image, i) => (
+                        <img
+                          key={i}
+                          src={`http://app.freshmoo.in/uploads/${image}`}
+                          alt={banner.title}
+                          className="w-10 h-10 object-cover rounded border"
+                        />
+                      ))
+                    ) : (
+                      <span className="text-gray-400">No Images</span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">{banner.link}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span
+                    className={`inline-block px-2 py-1 text-xs rounded-full ${
+                      banner.is_active
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {banner.is_active ? "Active" : "Inactive"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap flex space-x-2">
+                  <button
+                    onClick={() => setEditingBanner(banner)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(banner.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

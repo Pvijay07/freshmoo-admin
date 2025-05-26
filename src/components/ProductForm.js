@@ -8,6 +8,8 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     product ? product.description : ""
   );
   const [image, setImage] = useState(product ? product.image : "");
+  const [recommandable, setRecommandable] = useState(product ? product.recommandable : "");
+
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState([]);
   useEffect(() => {
@@ -33,6 +35,8 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     formData.append("name", name);
     formData.append("price", price);
     formData.append("description", description);
+    formData.append("recommandable", recommandable ? 1 : 0);
+
     // Append multiple images correctly
     images.forEach((file, index) => {
       formData.append(`files`, file); // Use array notation for multiple files
@@ -117,6 +121,16 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             required
           />
         </div>
+        <div className="mb-4 flex items-center space-x-2">
+          <label className="text-sm font-medium">Recommandable</label>
+          <input
+            type="checkbox"
+            checked={recommandable} // assuming description is a boolean now
+            onChange={(e) => setRecommandable(e.target.checked)}
+            className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+          />
+        </div>
+
         <div className="flex justify-end">
           <button
             type="button"

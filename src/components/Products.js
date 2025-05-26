@@ -92,120 +92,117 @@ const Products = () => {
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      {/* Header section */}
-      <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-xl font-semibold text-gray-800">Products</h1>
-        <button
-          onClick={() => setEditingProduct(true)}
-          className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-        >
-          <MdAdd className="mr-2" /> Add Product
-        </button>
-      </div>
-      {/* Form for Create/Edit */}
-      {editingProduct && (
-        <ProductForm
-          product={editingProduct}
-          onCancel={() => setEditingProduct(null)}
-          onSubmit={(updateProduct) =>
-            editingProduct.id
-              ? handleEditProduct(updateProduct, editingProduct.id)
-              : handleCreate(updateProduct)
-          }
-        />
-      )}
-      {/* Table section */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                S No
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Image
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Description
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {products.length > 0 ? (
-              products.map((product, index) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {index + 1}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.category}</td>
+  {/* Header section */}
+  <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <h1 className="text-lg sm:text-xl font-semibold text-gray-800">Products</h1>
+    <button
+      onClick={() => setEditingProduct(true)}
+      className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm sm:text-base"
+    >
+      <MdAdd className="mr-2" /> Add Product
+    </button>
+  </div>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex space-x-2">
-                      {product.image ? (
-                        JSON.parse(product.image).map((image, index) => (
-                          <img
-                            key={index}
-                            src={`http://app.freshmoo.in/uploads/${image}`}
-                            alt={product.name}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                        ))
-                      ) : (
-                        <span>No Images</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ₹{product.price}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => setEditingProduct(product)}
-                      className="text-blue-500 hover:text-blue-700 mr-2"
-                    >
-                      <MdEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <MdDelete />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="7"
-                  className="px-6 py-4 whitespace-nowrap text-center"
+  {/* Form */}
+  {editingProduct && (
+    <ProductForm
+      product={editingProduct}
+      onCancel={() => setEditingProduct(null)}
+      onSubmit={(updateProduct) =>
+        editingProduct.id
+          ? handleEditProduct(updateProduct, editingProduct.id)
+          : handleCreate(updateProduct)
+      }
+    />
+  )}
+
+  {/* Table */}
+  <div className="w-full overflow-x-auto">
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50">
+        <tr>
+          {[
+            "S No",
+            "Category",
+            "Name",
+            "Image",
+            "Price",
+            "Description",
+            "Actions",
+          ].map((title) => (
+            <th
+              key={title}
+              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+            >
+              {title}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        {products.length > 0 ? (
+          products.map((product, index) => (
+            <tr key={product.id} className="hover:bg-gray-50">
+              <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                {index + 1}
+              </td>
+              <td className="px-4 py-2 text-sm text-gray-900">
+                {product.category}
+              </td>
+              <td className="px-4 py-2 text-sm text-gray-900 truncate max-w-[150px]">
+                {product.name}
+              </td>
+              <td className="px-4 py-2 text-sm">
+                <div className="flex flex-wrap gap-2">
+                  {product.image &&
+                  Array.isArray(JSON.parse(product.image)) ? (
+                    JSON.parse(product.image).map((image, i) => (
+                      <img
+                        key={i}
+                        src={`http://app.freshmoo.in/uploads/${image}`}
+                        alt={product.name}
+                        className="w-10 h-10 object-cover rounded"
+                      />
+                    ))
+                  ) : (
+                    <span>No Images</span>
+                  )}
+                </div>
+              </td>
+              <td className="px-4 py-2 text-sm text-gray-500 whitespace-nowrap">
+                ₹{product.price}
+              </td>
+              <td className="px-4 py-2 text-sm text-gray-500 break-words max-w-xs">
+                {product.description}
+              </td>
+              <td className="px-4 py-2 text-sm font-medium whitespace-nowrap">
+                <button
+                  onClick={() => setEditingProduct(product)}
+                  className="text-blue-500 hover:text-blue-700 mr-2"
                 >
-                  No products found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                  <MdEdit />
+                </button>
+                <button
+                  onClick={() => handleDeleteProduct(product.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <MdDelete />
+                </button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="7" className="px-4 py-4 text-center text-sm">
+              No products found.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
   );
 };
 

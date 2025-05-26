@@ -18,7 +18,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./components/Login";
 import Navbar from "./components/Navbar";
 import AdminDashboard from "./components/AdminDashboard";
-
+import Footer from "./components/Footer"; // Adjust the import path as needed
+import CustomerPrivacyPolicy from "./components/CustomerPrivacyPolicy";
+import DeliveryPartnerPrivacyPolicy from "./components/DeliveryPartnerPrivacyPolicy";
 const App = () => {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
@@ -44,10 +46,20 @@ const App = () => {
               <Route path="/dashboard/coupons" element={<Coupons />} />
               <Route path="/dashboard/banners" element={<Banners />} />
             </Route>
+             <Route
+              path="/privacy/customer"
+              element={<CustomerPrivacyPolicy />}
+            />
+            <Route
+              path="/privacy/delivery-partner"
+              element={<DeliveryPartnerPrivacyPolicy />}
+            />
             <Route path="*" element={<Navigate to="/login" />} />
+           
           </Routes>
         </div>
       </div>
+      <Footer />
     </Router>
   );
 };

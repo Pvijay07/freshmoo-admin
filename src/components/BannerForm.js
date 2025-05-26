@@ -6,19 +6,25 @@ const BannerForm = ({ banner, onSubmit, onCancel }) => {
   const [imageUrl, setImageUrl] = useState(banner ? banner.image_url : '');
   const [link, setLink] = useState(banner ? banner.link : '');
   const [isActive, setIsActive] = useState(banner ? banner.is_active : true);
-
+    const [images, setImages] = useState([]);
+  
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files); // Convert FileList to Array
+    setImages(selectedFiles);
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      id: banner?.id,
-      title,
-      description,
-      image_url: imageUrl,
-      link,
-      is_active: isActive,
+    console.log(images);
+    const formData = new FormData();
+    formData.append("id", banner?.id);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("is_active", isActive);
+    images.forEach((file, index) => {
+      formData.append(`files`, file);
     });
+    onSubmit(formData);
   };
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-4">
       <h2 className="text-xl font-bold mb-4">
@@ -47,26 +53,16 @@ const BannerForm = ({ banner, onSubmit, onCancel }) => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Image URL</label>
+          <label className="block text-sm font-medium mb-2">Images</label>
           <input
-            type="text"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
+            type="file"
+            onChange={handleImageChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
-            placeholder="Image URL"
-            required
+            accept="image/*"
+            multiple
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Link</label>
-          <input
-            type="text"
-            value={link}
-            onChange={(e) => setLink(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            placeholder="Link"
-          />
-        </div>
+  
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Status</label>
           <select

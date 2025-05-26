@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import AssignOrderModal from "./AssignOrderModal";
-import { MdDelete, MdEdit } from "react-icons/md";
-import { ChevronDown, ChevronUp, MoreHorizontal, Search } from "lucide-react";
-import { api, getUsers } from "../api";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
+import { getUsers } from "../api";
+
 const UsersTable = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -10,7 +9,7 @@ const UsersTable = () => {
   const [sortField, setSortField] = useState("date");
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const ordersPerPage = 10;
+  const usersPerPage = 10;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -22,22 +21,15 @@ const UsersTable = () => {
     fetchUsers();
   }, []);
 
-  const filteredOrders = users.filter((user) => {
+  const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      // user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.number?.includes(searchQuery);
 
     return matchesSearch;
   });
-  // Pagination
-  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(
-    indexOfFirstOrder,
-    indexOfLastOrder
-  );
+
   // Sorting function
   const handleSort = (field) => {
     if (field === sortField) {
@@ -47,35 +39,129 @@ const UsersTable = () => {
       setSortDirection("asc");
     }
   };
+
+  // Sort users
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+    
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Status Badge Component
+  const StatusBadge = ({ status }) => {
+      const statusString = String(status || '').toLowerCase();
+
+    const statusConfig = {
+      active: {
+        bg: "bg-green-100",
+        text: "text-green-800",
+      },
+      inactive: {
+        bg: "bg-red-100",
+        text: "text-red-800",
+      },
+      pending: {
+        bg: "bg-yellow-100",
+        text: "text-yellow-800",
+      },
+    };
+
+    const config = statusConfig[statusString] || {
+      bg: "bg-gray-100",
+      text: "text-gray-800",
+    };
+
+    return (
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}
+      >
+        {status || "Unknown"}
+      </span>
+    );
+  };
+
+  // Mobile User Card
+  const MobileUserCard = ({ user }) => (
+    <div className="p-4 border-b">
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="font-medium text-indigo-600">#{user.id}</p>
+          <p className="font-medium">{user.name}</p>
+          <p className="text-sm text-gray-500">{user.email}</p>
+        </div>
+        <StatusBadge status={user.status} />
+      </div>
+      
+      <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+        <div>
+          <p className="text-gray-500">Phone</p>
+          <p>{user.number || "-"}</p>
+        </div>
+        <div>
+          <p className="text-gray-500">Gender</p>
+          <p>{user.gender || "-"}</p>
+        </div>
+        <div>
+          <p className="text-gray-500">Joined</p>
+          <p>
+            {new Date(user.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-lg shadow">
       {/* Header section */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 sm:p-6 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-xl font-semibold text-gray-800">Orders</h1>
-        </div>
-      </div>
-
-      {/* Filters section */}
-      <div className="p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-grow max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={18} className="text-gray-400" />
+          <h1 className="text-xl font-semibold text-gray-800">Users</h1>
+          <div className="w-full sm:w-auto">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={18} className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
           </div>
         </div>
       </div>
 
-      {/* Table section */}
-      <div className="overflow-x-auto">
+      {/* Mobile View */}
+      <div className="sm:hidden">
+        {loading ? (
+          <div className="p-4 text-center">Loading users...</div>
+        ) : currentUsers.length > 0 ? (
+          currentUsers.map((user) => (
+            <MobileUserCard key={user.id} user={user} />
+          ))
+        ) : (
+          <div className="p-4 text-center text-gray-500">No users found</div>
+        )}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -85,7 +171,7 @@ const UsersTable = () => {
                 onClick={() => handleSort("id")}
               >
                 <div className="flex items-center">
-                  S No
+                  ID
                   {sortField === "id" &&
                     (sortDirection === "asc" ? (
                       <ChevronUp size={16} className="ml-1" />
@@ -97,11 +183,11 @@ const UsersTable = () => {
               <th
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("customer")}
+                onClick={() => handleSort("name")}
               >
                 <div className="flex items-center">
                   Name
-                  {sortField === "customer" &&
+                  {sortField === "name" &&
                     (sortDirection === "asc" ? (
                       <ChevronUp size={16} className="ml-1" />
                     ) : (
@@ -112,11 +198,11 @@ const UsersTable = () => {
               <th
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("customer")}
+                onClick={() => handleSort("email")}
               >
                 <div className="flex items-center">
                   Email
-                  {sortField === "customer" &&
+                  {sortField === "email" &&
                     (sortDirection === "asc" ? (
                       <ChevronUp size={16} className="ml-1" />
                     ) : (
@@ -126,33 +212,15 @@ const UsersTable = () => {
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("date")}
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                <div className="flex items-center">
-                  Number
-                  {sortField === "date" &&
-                    (sortDirection === "asc" ? (
-                      <ChevronUp size={16} className="ml-1" />
-                    ) : (
-                      <ChevronDown size={16} className="ml-1" />
-                    ))}
-                </div>
+                Phone
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("gender")}
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                <div className="flex items-center">
-                  Gender
-                  {sortField === "status" &&
-                    (sortDirection === "asc" ? (
-                      <ChevronUp size={16} className="ml-1" />
-                    ) : (
-                      <ChevronDown size={16} className="ml-1" />
-                    ))}
-                </div>
+                Gender
               </th>
               <th
                 scope="col"
@@ -172,11 +240,11 @@ const UsersTable = () => {
               <th
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("payment")}
+                onClick={() => handleSort("created_at")}
               >
                 <div className="flex items-center">
-                  Joined at
-                  {sortField === "payment" &&
+                  Joined
+                  {sortField === "created_at" &&
                     (sortDirection === "asc" ? (
                       <ChevronUp size={16} className="ml-1" />
                     ) : (
@@ -188,44 +256,44 @@ const UsersTable = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
-              <p>Loading...</p>
-            ) : users.length > 0 ? (
-              currentOrders.map(
-                (
-                  user // ✅ Removed extra `{}` around map()
-                ) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                      {user.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.name ?? ""}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.email ?? ""}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.number}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.gender}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.status ?? ""}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(user.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </td>
-                  </tr>
-                )
-              )
+              <tr>
+                <td colSpan="7" className="px-6 py-4 text-center">
+                  Loading users...
+                </td>
+              </tr>
+            ) : currentUsers.length > 0 ? (
+              currentUsers.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                    {user.id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {user.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.email}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.number || "-"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.gender || "-"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <StatusBadge status={user.status} />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(user.created_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
-                <td colSpan="5" className="px-6 py-4 text-center">
+                <td colSpan="7" className="px-6 py-4 text-center">
                   No users found.
                 </td>
               </tr>
@@ -233,17 +301,17 @@ const UsersTable = () => {
           </tbody>
         </table>
       </div>
+
       {/* Pagination section */}
-      <div className="px-6 py-4 bg-white border-t border-gray-200">
-        <div className="flex items-center justify-between">
+      <div className="px-4 py-3 sm:px-6 sm:py-4 bg-white border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{indexOfFirstOrder + 1}</span>{" "}
+            Showing <span className="font-medium">{indexOfFirstUser + 1}</span>{" "}
             to{" "}
             <span className="font-medium">
-              {Math.min(indexOfLastOrder, filteredOrders.length)}
+              {Math.min(indexOfLastUser, sortedUsers.length)}
             </span>{" "}
-            of <span className="font-medium">{filteredOrders.length}</span>{" "}
-            orders
+            of <span className="font-medium">{sortedUsers.length}</span> users
           </div>
           <div className="flex space-x-2">
             <button
