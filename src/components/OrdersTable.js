@@ -8,40 +8,62 @@ import {
   Clock,
   Truck,
   XCircle,
-  MoreHorizontal,
+  Calendar,
+  MapPin,
+  Package,
 } from "lucide-react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { getDeliveryPartners, getOrders } from "../api";
 import { BsQuestionCircle } from "react-icons/bs";
 import AssigneeDropdown from "./AssignOrderModal";
-import axios from "axios";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const OrdersTable = () => {
-  const [sortField, setSortField] = useState("date");
+  const [sortField, setSortField] = useState("order_date");
   const [sortDirection, setSortDirection] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [filterLocation, setFilterLocation] = useState("All");
   const [orders, setOrders] = useState([]);
   const [assignees, setAssignees] = useState([]);
+  const [selectedOrders, setSelectedOrders] = useState([]);
+  const [productStats, setProductStats] = useState({});
   const ordersPerPage = 10;
 
   React.useEffect(() => {
     const fetchOrders = async () => {
       const data = await getOrders();
       setOrders(data.orders);
+      calculateProductStats(data.orders);
     };
     fetchOrders();
   }, []);
+
+  const calculateProductStats = (orders) => {
+    const stats = {};
+    orders.forEach(order => {
+      order?.items?.split(',').forEach(item => {
+        const product = item.trim();
+        stats[product] = (stats[product] || 0) + 1;
+      });
+    });
+    setProductStats(stats);
+  };
 
   const statusOptions = [
     "All",
     "Pending",
     "Processing",
-    "Shipped",
+    "Out for Delivery",
     "Delivered",
+    "Missed",
     "Cancelled",
   ];
+
+  const locationOptions = ["All", "North", "South", "East", "West", "Central"];
 
   const handleSort = (field) => {
     if (field === sortField) {
@@ -50,6 +72,29 @@ const OrdersTable = () => {
       setSortField(field);
       setSortDirection("asc");
     }
+  };
+
+  const handleSelectOrder = (orderId) => {
+    setSelectedOrders(prev =>
+      prev.includes(orderId)
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedOrders.length === currentOrders.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(currentOrders.map(order => order.id));
+    }
+  };
+
+  const handleBulkAssign = (assigneeId) => {
+    // Implement bulk assignment logic
+    console.log(`Assigning orders ${selectedOrders.join(', ')} to ${assigneeId}`);
+    // Reset selection
+    setSelectedOrders([]);
   };
 
   const filteredOrders = orders
@@ -61,13 +106,20 @@ const OrdersTable = () => {
       const matchesStatus =
         filterStatus === "All" || order.status === filterStatus;
 
-      return matchesSearch && matchesStatus;
+      const matchesDateRange =
+        (!startDate || new Date(order.order_date) >= startDate) &&
+        (!endDate || new Date(order.order_date) <= endDate);
+
+      const matchesLocation =
+        filterLocation === "All" || order.location === filterLocation;
+
+      return matchesSearch && matchesStatus && matchesDateRange && matchesLocation;
     })
     .sort((a, b) => {
       let compareA = a[sortField];
       let compareB = b[sortField];
 
-      if (sortField === "date") {
+      if (sortField === "order_date") {
         compareA = new Date(compareA);
         compareB = new Date(compareB);
       }
@@ -103,7 +155,7 @@ const OrdersTable = () => {
         text: "text-blue-800",
         icon: <Clock size={14} className="mr-1" />,
       },
-      Shipped: {
+      "Out for Delivery": {
         bg: "bg-purple-100",
         text: "text-purple-800",
         icon: <Truck size={14} className="mr-1" />,
@@ -112,6 +164,11 @@ const OrdersTable = () => {
         bg: "bg-yellow-100",
         text: "text-yellow-800",
         icon: <Clock size={14} className="mr-1" />,
+      },
+      Missed: {
+        bg: "bg-orange-100",
+        text: "text-orange-800",
+        icon: <XCircle size={14} className="mr-1" />,
       },
       Cancelled: {
         bg: "bg-red-100",
@@ -178,36 +235,51 @@ const OrdersTable = () => {
           <p className="text-gray-500">Items</p>
           <p>{order.items}</p>
         </div>
+        <div>
+          <p className="text-gray-500">Location</p>
+          <p>{order.location ?? "-"}</p>
+        </div>
       </div>
       
-      <div className="mt-2">
+      <div className="mt-2 flex justify-between items-center">
         <AssigneeDropdown assignees={assignees} orderId={order.id} />
+        <input
+          type="checkbox"
+          checked={selectedOrders.includes(order.id)}
+          onChange={() => handleSelectOrder(order.id)}
+          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+        />
       </div>
     </div>
   );
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-xl font-semibold text-gray-800">Orders</h1>
-        <div className="w-full sm:w-auto flex gap-2">
-          <div className="relative flex-grow sm:max-w-xs">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
-            <input
-              type="text"
-              className="w-full pl-10 pr-3 py-2 border rounded-md text-sm placeholder-gray-400 focus:ring-2 focus:ring-indigo-500"
-              placeholder="Search orders..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <h1 className="text-xl font-semibold text-gray-800">Orders Management</h1>
+          <div className="w-full sm:w-auto flex gap-2">
+            <div className="relative flex-grow sm:max-w-xs">
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="text"
+                className="w-full pl-10 pr-3 py-2 border rounded-md text-sm placeholder-gray-400 focus:ring-2 focus:ring-indigo-500"
+                placeholder="Search orders..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
           <div className="flex items-center gap-2">
-            <Filter size={18} className="text-gray-500 hidden sm:block" />
+            <Filter size={18} className="text-gray-500" />
             <select
-              className="border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
@@ -217,6 +289,72 @@ const OrdersTable = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <MapPin size={18} className="text-gray-500" />
+            <select
+              className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+            >
+              {locationOptions.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Calendar size={18} className="text-gray-500" />
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
+              placeholderText="Start Date"
+              className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Calendar size={18} className="text-gray-500" />
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
+              minDate={startDate}
+              placeholderText="End Date"
+              className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          {selectedOrders.length > 0 && (
+            <div className="flex items-center">
+              <AssigneeDropdown 
+                assignees={assignees} 
+                onSelect={handleBulkAssign}
+                buttonText={`Assign ${selectedOrders.length} Orders`}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Product Statistics */}
+        <div className="bg-gray-50 p-3 rounded-md mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Orders by Product</h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(productStats).map(([product, count]) => (
+              <div key={product} className="flex items-center bg-white px-3 py-1 rounded-full shadow-xs">
+                <Package size={14} className="text-indigo-500 mr-1" />
+                <span className="text-xs font-medium">{product}:</span>
+                <span className="text-xs ml-1 font-bold">{count}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -233,14 +371,24 @@ const OrdersTable = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {["id", "customer", "date", "status", "payment", "amount", "items"].map((field) => (
+              <th className="px-4 py-2 w-8">
+                <input
+                  type="checkbox"
+                  checked={selectedOrders.length === currentOrders.length && currentOrders.length > 0}
+                  onChange={handleSelectAll}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+              </th>
+              {["id", "customer", "order_date", "status", "payment", "amount", "items", "location"].map((field) => (
                 <th
                   key={field}
                   className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort(field)}
                 >
                   <div className="flex items-center">
-                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                    {field === "order_date" ? "Date" : 
+                     field === "order_date" ? "Date" : 
+                     field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}
                     {sortField === field &&
                       (sortDirection === "asc" ? (
                         <ChevronUp size={16} />
@@ -258,6 +406,14 @@ const OrdersTable = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {currentOrders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50">
+                <td className="px-4 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedOrders.includes(order.id)}
+                    onChange={() => handleSelectOrder(order.id)}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                </td>
                 <td className="px-4 py-2 text-sm font-medium text-indigo-600">
                   #{order.id}
                 </td>
@@ -282,6 +438,9 @@ const OrdersTable = () => {
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-500">
                   {order.items}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-500">
+                  {order.location ?? "-"}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-500">
                   {assignees[order.id]?.name ? (
