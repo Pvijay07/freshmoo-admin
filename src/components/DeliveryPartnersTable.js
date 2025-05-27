@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Trash2, Edit, Filter, X, MapPin } from "lucide-react";
+import { getDeliveryPartners } from "../api";
 
 const DeliveryPartnersTable = () => {
   const [deliveryPartners, setDeliveryPartners] = useState([]);
@@ -60,13 +61,11 @@ const DeliveryPartnersTable = () => {
     const fetchDeliveryPartners = async () => {
       try {
         setLoading(true);
-        // Replace this with your actual API call
-        // const data = await getDeliveryPartners();
-        
-        // Using mock data for demo
+        const data = await getDeliveryPartners();
+
         setTimeout(() => {
-          setDeliveryPartners(mockData.partners);
-          setFilteredPartners(mockData.partners);
+          setDeliveryPartners(data.partners);
+          setFilteredPartners(data.partners);
           setLoading(false);
         }, 1000);
       } catch (err) {

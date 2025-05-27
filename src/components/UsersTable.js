@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Search, Filter, X, Calendar } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Filter,
+  X,
+  Calendar,
+} from "lucide-react";
+import { getUsers } from "../api";
 
 const UsersTable = () => {
   const [loading, setLoading] = useState(false);
@@ -18,81 +26,23 @@ const UsersTable = () => {
     subscriptionStatus: "",
     walletBalance: { min: "", max: "" },
     deliveryStatus: "",
-    dateRange: { start: "", end: "" }
+    dateRange: { start: "", end: "" },
   });
 
   // Mock data - replace with actual API call
   useEffect(() => {
-    const mockUsers = [
-      {
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        number: "+1-555-0123",
-        gender: "Male",
-        status: "active",
-        subscriptionStatus: "premium",
-        walletBalance: 150.75,
-        deliveryStatus: "delivered",
-        created_at: "2024-01-15T10:30:00Z",
-        totalOrders: 5
-      },
-      {
-        id: 2,
-        name: "Jane Smith",
-        email: "jane@example.com",
-        number: "+1-555-0124",
-        gender: "Female",
-        status: "active",
-        subscriptionStatus: "basic",
-        walletBalance: 45.20,
-        deliveryStatus: "pending",
-        created_at: "2024-02-20T14:15:00Z",
-        totalOrders: 2
-      },
-      {
-        id: 3,
-        name: "Bob Johnson",
-        email: "bob@example.com",
-        number: "+1-555-0125",
-        gender: "Male",
-        status: "inactive",
-        subscriptionStatus: "none",
-        walletBalance: 0,
-        deliveryStatus: "failed",
-        created_at: "2024-01-10T09:45:00Z",
-        totalOrders: 0
-      },
-      {
-        id: 4,
-        name: "Alice Brown",
-        email: "alice@example.com",
-        number: "+1-555-0126",
-        gender: "Female",
-        status: "pending",
-        subscriptionStatus: "premium",
-        walletBalance: 320.50,
-        deliveryStatus: "delivered",
-        created_at: "2024-03-05T16:20:00Z",
-        totalOrders: 8
-      },
-      {
-        id: 5,
-        name: "Charlie Wilson",
-        email: "charlie@example.com",
-        number: "+1-555-0127",
-        gender: "Male",
-        status: "active",
-        subscriptionStatus: "premium",
-        walletBalance: 89.99,
-        deliveryStatus: "in_transit",
-        created_at: "2024-02-28T11:00:00Z",
-        totalOrders: 3
+    const fetchUsers = async () => {
+      try {
+        const data = await getUsers();
+        setUsers(data.customers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
       }
-    ];
-    setUsers(mockUsers);
-  }, []);
+    };
 
+    fetchUsers();
+  }, []);
+  console.log(users);
   // Apply filters
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -102,21 +52,38 @@ const UsersTable = () => {
 
     const matchesStatus = !filters.status || user.status === filters.status;
     const matchesGender = !filters.gender || user.gender === filters.gender;
-    const matchesSubscription = !filters.subscriptionStatus || user.subscriptionStatus === filters.subscriptionStatus;
-    const matchesDelivery = !filters.deliveryStatus || user.deliveryStatus === filters.deliveryStatus;
+    const matchesSubscription =
+      !filters.subscriptionStatus ||
+      user.subscriptionStatus === filters.subscriptionStatus;
+    const matchesDelivery =
+      !filters.deliveryStatus || user.deliveryStatus === filters.deliveryStatus;
 
     // Wallet balance filter
-    const matchesWalletMin = !filters.walletBalance.min || user.walletBalance >= parseFloat(filters.walletBalance.min);
-    const matchesWalletMax = !filters.walletBalance.max || user.walletBalance <= parseFloat(filters.walletBalance.max);
+    const matchesWalletMin =
+      !filters.walletBalance.min ||
+      user.walletBalance >= parseFloat(filters.walletBalance.min);
+    const matchesWalletMax =
+      !filters.walletBalance.max ||
+      user.walletBalance <= parseFloat(filters.walletBalance.max);
 
     // Date range filter
     const userDate = new Date(user.created_at);
-    const matchesDateStart = !filters.dateRange.start || userDate >= new Date(filters.dateRange.start);
-    const matchesDateEnd = !filters.dateRange.end || userDate <= new Date(filters.dateRange.end);
+    const matchesDateStart =
+      !filters.dateRange.start || userDate >= new Date(filters.dateRange.start);
+    const matchesDateEnd =
+      !filters.dateRange.end || userDate <= new Date(filters.dateRange.end);
 
-    return matchesSearch && matchesStatus && matchesGender && matchesSubscription && 
-           matchesDelivery && matchesWalletMin && matchesWalletMax && 
-           matchesDateStart && matchesDateEnd;
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesGender &&
+      matchesSubscription &&
+      matchesDelivery &&
+      matchesWalletMin &&
+      matchesWalletMax &&
+      matchesDateStart &&
+      matchesDateEnd
+    );
   });
 
   // Sorting function
@@ -133,13 +100,31 @@ const UsersTable = () => {
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     let aValue = a[sortField];
     let bValue = b[sortField];
-    
+
     // Handle date sorting
     if (sortField === "created_at") {
       aValue = new Date(aValue);
       bValue = new Date(bValue);
     }
-    
+    if (sortField.startsWith("deliveryStatus.")) {
+      const subField = sortField.split(".")[1];
+      const valueA = a.deliveryStatus?.[subField];
+      const valueB = b.deliveryStatus?.[subField];
+
+      if (typeof valueA === "boolean") {
+        return sortField
+          ? valueA === valueB
+            ? 0
+            : valueA
+            ? -1
+            : 1
+          : valueA === valueB
+          ? 0
+          : valueA
+          ? 1
+          : -1;
+      }
+    }
     if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
     if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
     return 0;
@@ -153,31 +138,31 @@ const UsersTable = () => {
 
   // Filter handlers
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [filterType]: value
+      [filterType]: value,
     }));
     setCurrentPage(1);
   };
 
   const handleWalletBalanceChange = (type, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       walletBalance: {
         ...prev.walletBalance,
-        [type]: value
-      }
+        [type]: value,
+      },
     }));
     setCurrentPage(1);
   };
 
   const handleDateRangeChange = (type, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       dateRange: {
         ...prev.dateRange,
-        [type]: value
-      }
+        [type]: value,
+      },
     }));
     setCurrentPage(1);
   };
@@ -189,7 +174,7 @@ const UsersTable = () => {
       subscriptionStatus: "",
       walletBalance: { min: "", max: "" },
       deliveryStatus: "",
-      dateRange: { start: "", end: "" }
+      dateRange: { start: "", end: "" },
     });
     setCurrentPage(1);
   };
@@ -207,7 +192,7 @@ const UsersTable = () => {
 
   // Status Badge Component
   const StatusBadge = ({ status, type = "status" }) => {
-    const statusString = String(status || '').toLowerCase();
+    const statusString = String(status || "").toLowerCase();
 
     const statusConfigs = {
       status: {
@@ -225,7 +210,7 @@ const UsersTable = () => {
         pending: { bg: "bg-yellow-100", text: "text-yellow-800" },
         in_transit: { bg: "bg-blue-100", text: "text-blue-800" },
         failed: { bg: "bg-red-100", text: "text-red-800" },
-      }
+      },
     };
 
     const config = statusConfigs[type]?.[statusString] || {
@@ -234,7 +219,9 @@ const UsersTable = () => {
     };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}
+      >
         {status || "Unknown"}
       </span>
     );
@@ -251,7 +238,7 @@ const UsersTable = () => {
         </div>
         <StatusBadge status={user.status} type="status" />
       </div>
-      
+
       <div className="grid grid-cols-2 gap-3 text-sm mb-3">
         <div>
           <p className="text-gray-500">Phone</p>
@@ -267,18 +254,61 @@ const UsersTable = () => {
         </div>
         <div>
           <p className="text-gray-500">Wallet Balance</p>
-          <p className="font-medium">${user.walletBalance?.toFixed(2) || "0.00"}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Delivery Status</p>
-          <StatusBadge status={user.deliveryStatus} type="delivery" />
+          <p className="font-medium">${Number(user.balance || 0).toFixed(2)}</p>
         </div>
         <div>
           <p className="text-gray-500">Total Orders</p>
           <p>{user.totalOrders || 0}</p>
         </div>
       </div>
-      
+
+      {/* Delivery Status Section */}
+      <div className="mb-3">
+        <p className="text-gray-500 mb-2">Delivery Instructions</p>
+        <div className="space-y-2 text-sm bg-gray-50 p-3 rounded-lg">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Call Before:</span>
+            <span>
+              {user.deliveryStatus?.call_before_delivery ? "✓ Yes" : "✗ No"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Ring Bell:</span>
+            <span>{user.deliveryStatus?.ring_the_bell ? "✓ Yes" : "✗ No"}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-gray-600 mb-1">Voice Instructions:</span>
+            {user.deliveryStatus?.voice_instructions ? (
+              <audio controls className="w-full">
+                <source
+                  src={user.deliveryStatus.voice_instructions}
+                  type="audio/mpeg"
+                />
+              </audio>
+            ) : (
+              <span className="text-gray-500">None</span>
+            )}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-gray-600 mb-1">Door Images:</span>
+            {user.deliveryStatus?.door_image_urls?.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {user.deliveryStatus.door_image_urls.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Door image ${idx + 1}`}
+                    className="h-12 w-12 object-cover rounded border"
+                  />
+                ))}
+              </div>
+            ) : (
+              <span className="text-gray-500">None</span>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="text-sm">
         <p className="text-gray-500">Joined</p>
         <p>
@@ -298,7 +328,9 @@ const UsersTable = () => {
       <div className="p-4 sm:p-6 border-b border-gray-200">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 className="text-xl font-semibold text-gray-800">Customer Management</h1>
+            <h1 className="text-xl font-semibold text-gray-800">
+              Customer Management
+            </h1>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -318,7 +350,7 @@ const UsersTable = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="w-full sm:w-96">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -355,11 +387,13 @@ const UsersTable = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Status Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Status
+                </label>
                 <select
                   value={filters.status}
                   onChange={(e) => handleFilterChange("status", e.target.value)}
@@ -374,7 +408,9 @@ const UsersTable = () => {
 
               {/* Gender Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Gender
+                </label>
                 <select
                   value={filters.gender}
                   onChange={(e) => handleFilterChange("gender", e.target.value)}
@@ -389,10 +425,14 @@ const UsersTable = () => {
 
               {/* Subscription Status Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Subscription</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Subscription
+                </label>
                 <select
                   value={filters.subscriptionStatus}
-                  onChange={(e) => handleFilterChange("subscriptionStatus", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("subscriptionStatus", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">All Subscriptions</option>
@@ -404,10 +444,14 @@ const UsersTable = () => {
 
               {/* Delivery Status Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Delivery Status</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Delivery Status
+                </label>
                 <select
                   value={filters.deliveryStatus}
-                  onChange={(e) => handleFilterChange("deliveryStatus", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("deliveryStatus", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">All Delivery Status</option>
@@ -420,20 +464,26 @@ const UsersTable = () => {
 
               {/* Wallet Balance Range */}
               <div className="sm:col-span-2 lg:col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Wallet Balance Range</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Wallet Balance Range
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
                     placeholder="Min"
                     value={filters.walletBalance.min}
-                    onChange={(e) => handleWalletBalanceChange("min", e.target.value)}
+                    onChange={(e) =>
+                      handleWalletBalanceChange("min", e.target.value)
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={filters.walletBalance.max}
-                    onChange={(e) => handleWalletBalanceChange("max", e.target.value)}
+                    onChange={(e) =>
+                      handleWalletBalanceChange("max", e.target.value)
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -441,18 +491,24 @@ const UsersTable = () => {
 
               {/* Date Range Filter */}
               <div className="sm:col-span-2 lg:col-span-2">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Join Date Range</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Join Date Range
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="date"
                     value={filters.dateRange.start}
-                    onChange={(e) => handleDateRangeChange("start", e.target.value)}
+                    onChange={(e) =>
+                      handleDateRangeChange("start", e.target.value)
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <input
                     type="date"
                     value={filters.dateRange.end}
-                    onChange={(e) => handleDateRangeChange("end", e.target.value)}
+                    onChange={(e) =>
+                      handleDateRangeChange("end", e.target.value)
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -471,7 +527,9 @@ const UsersTable = () => {
             <MobileUserCard key={user.id} user={user} />
           ))
         ) : (
-          <div className="p-4 text-center text-gray-500">No customers found</div>
+          <div className="p-4 text-center text-gray-500">
+            No customers found
+          </div>
         )}
       </div>
 
@@ -610,29 +668,86 @@ const UsersTable = () => {
                 </td>
               </tr>
             ) : currentUsers.length > 0 ? (
-              currentUsers.map((user) => (
+              currentUsers.map((user, index) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                    #{user.id}
+                    #{index + 1}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.name}
+                      </div>
                       <div className="text-sm text-gray-500">{user.email}</div>
                       <div className="text-xs text-gray-400">{user.number}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={user.status} type="status" />
+                    <StatusBadge
+                      status={user.status == 1 ? "Active" : "In Active"}
+                      type="status"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={user.subscriptionStatus} type="subscription" />
+                    <StatusBadge
+                      status={user.subscriptionStatus}
+                      type="subscription"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     ${user.walletBalance?.toFixed(2) || "0.00"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={user.deliveryStatus} type="delivery" />
+                    <div className="text-sm text-gray-900 space-y-1">
+                      <div className="flex items-center">
+                        <span className="w-32">Call Before:</span>
+                        <span>
+                          {user.deliveryStatus?.call_before_delivery
+                            ? "✓ Yes"
+                            : "✗ No"}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="w-32">Ring Bell:</span>
+                        <span>
+                          {user.deliveryStatus?.ring_the_bell
+                            ? "✓ Yes"
+                            : "✗ No"}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="w-32">Voice Instructions:</span>
+                        {user.deliveryStatus?.voice_instructions ? (
+                          <audio controls className="h-8">
+                            <source
+                              src={user.deliveryStatus.voice_instructions}
+                              type="audio/mpeg"
+                            />
+                          </audio>
+                        ) : (
+                          <span> None</span>
+                        )}
+                      </div>
+                      <div className="flex items-start">
+                        <span className="w-32">Door Images:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {user.deliveryStatus?.door_image_urls?.length > 0 ? (
+                            user.deliveryStatus.door_image_urls.map(
+                              (img, idx) => (
+                                <img
+                                  key={idx}
+                                  src={img}
+                                  alt={`Door image ${idx + 1}`}
+                                  className="h-10 w-10 object-cover rounded"
+                                />
+                              )
+                            )
+                          ) : (
+                            <span>None</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {user.totalOrders || 0}
@@ -666,7 +781,8 @@ const UsersTable = () => {
             <span className="font-medium">
               {Math.min(indexOfLastUser, sortedUsers.length)}
             </span>{" "}
-            of <span className="font-medium">{sortedUsers.length}</span> customers
+            of <span className="font-medium">{sortedUsers.length}</span>{" "}
+            customers
             {getActiveFilterCount() > 0 && (
               <span className="text-indigo-600"> (filtered)</span>
             )}
