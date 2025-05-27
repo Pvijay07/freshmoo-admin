@@ -8,8 +8,12 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     product ? product.description : ""
   );
   const [image, setImage] = useState(product ? product.image : "");
-  const [recommandable, setRecommandable] = useState(product ? product.recommandable : "");
-
+  const [recommandable, setRecommandable] = useState(
+    product ? product.recommandable : ""
+  );
+  const [actualPrice, setactualPrice] = useState(
+    product ? product.actual_price : 0
+  );
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState([]);
   useEffect(() => {
@@ -19,6 +23,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       setDescription(product.description);
       setCategory(product.category_id);
       setImage(product.image);
+      setactualPrice(product.actual_price)
     }
   }, [product]);
   const [images, setImages] = useState([]);
@@ -28,12 +33,14 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(images);
+    // console.log(images);
     const formData = new FormData();
+
     formData.append("id", product?.id);
     formData.append("category", category);
     formData.append("name", name);
     formData.append("price", price);
+    formData.append("actual_price", actualPrice);
     formData.append("description", description);
     formData.append("recommandable", recommandable ? 1 : 0);
 
@@ -90,13 +97,26 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Price</label>
+          <label className="block text-sm font-medium mb-2">Actual Price</label>
+          <input
+            type="number"
+            value={actualPrice}
+            onChange={(e) => setPrice(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            placeholder="Product Actual Price"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            Selling Price
+          </label>
           <input
             type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-lg"
-            placeholder="Product Price"
+            placeholder="Product Selling Price"
             required
           />
         </div>

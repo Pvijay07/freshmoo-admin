@@ -225,7 +225,7 @@ const OrdersTable = () => {
         </div>
         <div>
           <p className="text-gray-500">Amount</p>
-          <p>{order.amount}</p>
+          <p>{order.total_amount}</p>
         </div>
         <div>
           <p className="text-gray-500">Payment</p>
@@ -233,11 +233,11 @@ const OrdersTable = () => {
         </div>
         <div>
           <p className="text-gray-500">Items</p>
-          <p>{order.items}</p>
+          <p>{order.item_count}</p>
         </div>
         <div>
           <p className="text-gray-500">Location</p>
-          <p>{order.location ?? "-"}</p>
+          <p>{order.address ?? "-"}</p>
         </div>
       </div>
       
@@ -431,16 +431,16 @@ const OrdersTable = () => {
                   <StatusBadge status={order.status} />
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-500">
-                  {order.payment ?? "-"}
+                  {order.payment ?? "Done"}
                 </td>
                 <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                  {order.amount}
+                  {order.total_amount}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-500">
-                  {order.items}
+                  {order.item_count}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-500">
-                  {order.location ?? "-"}
+                  {order.address ?? "-"}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-500">
                   {assignees[order.id]?.name ? (

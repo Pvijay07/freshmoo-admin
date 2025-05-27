@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { 
-  ShoppingCart, 
-  Package, 
-  Users, 
+import {
+  ShoppingCart,
+  Package,
+  Users,
   TrendingUp,
   TrendingDown,
   Calendar,
@@ -14,126 +14,47 @@ import {
   Star,
   MapPin,
   Phone,
-  Mail
+  Mail,
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { getOrders, getProducts, getUsers } from "../api";
 
-// Mock API functions with more comprehensive data
-const getOrders = async () => ({
-  orders: [
-    {
-      id: 1001,
-      customer: "Rahul Sharma",
-      customer_email: "rahul@example.com",
-      customer_phone: "+91 98765 43210",
-      order_date: "2025-05-25T10:30:00",
-      status: "Delivered",
-      total_amount: 1250,
-      items_count: 3,
-      delivery_address: "Mumbai, Maharashtra"
-    },
-    {
-      id: 1002,
-      customer: "Priya Patel",
-      customer_email: "priya@example.com",
-      customer_phone: "+91 87654 32109",
-      order_date: "2025-05-25T14:15:00",
-      status: "Processing",
-      total_amount: 850,
-      items_count: 2,
-      delivery_address: "Delhi, NCR"
-    },
-    {
-      id: 1003,
-      customer: "Amit Kumar",
-      customer_email: "amit@example.com",
-      customer_phone: "+91 76543 21098",
-      order_date: "2025-05-24T16:45:00",
-      status: "Shipped",
-      total_amount: 2100,
-      items_count: 5,
-      delivery_address: "Bangalore, Karnataka"
-    },
-    {
-      id: 1004,
-      customer: "Sneha Singh",
-      customer_email: "sneha@example.com",
-      customer_phone: "+91 65432 10987",
-      order_date: "2025-05-24T09:20:00",
-      status: "Pending",
-      total_amount: 650,
-      items_count: 1,
-      delivery_address: "Chennai, Tamil Nadu"
-    },
-    {
-      id: 1005,
-      customer: "Vikram Joshi",
-      customer_email: "vikram@example.com",
-      customer_phone: "+91 54321 09876",
-      order_date: "2025-05-23T11:30:00",
-      status: "Delivered",
-      total_amount: 1800,
-      items_count: 4,
-      delivery_address: "Pune, Maharashtra"
-    },
-    {
-      id: 1006,
-      customer: "Anita Gupta",
-      customer_email: "anita@example.com",
-      customer_phone: "+91 43210 98765",
-      order_date: "2025-05-23T13:45:00",
-      status: "Cancelled",
-      total_amount: 450,
-      items_count: 2,
-      delivery_address: "Hyderabad, Telangana"
-    },
-    {
-      id: 1007,
-      customer: "Rohit Mehta",
-      customer_email: "rohit@example.com",
-      customer_phone: "+91 32109 87654",
-      order_date: "2025-05-22T15:10:00",
-      status: "Delivered",
-      total_amount: 950,
-      items_count: 3,
-      delivery_address: "Kolkata, West Bengal"
-    }
-  ]
-});
+const fetchOrders = async () => {
+  return await getOrders(); // Return the result
+};
 
-const getProducts = async () => ({
-  products: [
-    { id: 1, name: "Fresh Organic Apples", category: "Fruits", price: 250, stock: 45 },
-    { id: 2, name: "Whole Wheat Bread", category: "Bakery", price: 45, stock: 120 },
-    { id: 3, name: "Farm Fresh Milk", category: "Dairy", price: 60, stock: 80 },
-    { id: 4, name: "Organic Spinach", category: "Vegetables", price: 35, stock: 60 },
-    { id: 5, name: "Greek Yogurt", category: "Dairy", price: 120, stock: 25 },
-    { id: 6, name: "Basmati Rice", category: "Grains", price: 180, stock: 90 },
-    { id: 7, name: "Fresh Bananas", category: "Fruits", price: 80, stock: 150 }
-  ]
-});
+const fetchProducts = async () => {
+ return await getProducts(); // Return the result
+};
 
-const getUsers = async () => ({
-  customers: [
-    { id: 1, name: "Rahul Sharma", email: "rahul@example.com", total_orders: 5, joined_date: "2024-12-15" },
-    { id: 2, name: "Priya Patel", email: "priya@example.com", total_orders: 3, joined_date: "2025-01-10" },
-    { id: 3, name: "Amit Kumar", email: "amit@example.com", total_orders: 8, joined_date: "2024-11-20" },
-    { id: 4, name: "Sneha Singh", email: "sneha@example.com", total_orders: 2, joined_date: "2025-02-05" },
-    { id: 5, name: "Vikram Joshi", email: "vikram@example.com", total_orders: 6, joined_date: "2024-10-30" }
-  ]
-});
+const fetchUsers = async () => {
+ return await getUsers();
+};
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('7days');
+  const [selectedPeriod, setSelectedPeriod] = useState("7days");
   const [expandedCards, setExpandedCards] = useState({
     overview: true,
     orders: false,
     customers: false,
-    products: false
+    products: false,
   });
 
   useEffect(() => {
@@ -141,11 +62,10 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         const [ordersData, productsData, usersData] = await Promise.all([
-          getOrders(),
-          getProducts(),
-          getUsers()
+          fetchOrders(),
+          fetchProducts(),
+          fetchUsers(),
         ]);
-        
         setOrders(ordersData.orders);
         setProducts(productsData.products);
         setUsers(usersData.customers);
@@ -161,37 +81,58 @@ const AdminDashboard = () => {
 
   // Calculate analytics data
   const analytics = useMemo(() => {
-    const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
-    const completedOrders = orders.filter(order => order.status === 'Delivered').length;
-    const pendingOrders = orders.filter(order => order.status === 'Pending' || order.status === 'Processing').length;
-    const cancelledOrders = orders.filter(order => order.status === 'Cancelled').length;
-    
+    const totalRevenue = orders.reduce(
+      (sum, order) => sum + parseFloat(order.total_amount || 0),
+      0
+    );
+    const completedOrders = orders.filter(
+      (order) => order.status === "Delivered"
+    ).length;
+    const pendingOrders = orders.filter(
+      (order) => order.status === "Pending" || order.status === "Processing"
+    ).length;
+    const cancelledOrders = orders.filter(
+      (order) => order.status === "Cancelled"
+    ).length;
+
     // Calculate growth (mock data for demo)
     const previousRevenue = totalRevenue * 0.85;
-    const revenueGrowth = ((totalRevenue - previousRevenue) / previousRevenue) * 100;
-    
+    const revenueGrowth =
+      ((totalRevenue - previousRevenue) / previousRevenue) * 100;
+
     const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
-    
+
     // Daily revenue for chart
     const dailyRevenue = orders.reduce((acc, order) => {
       const date = new Date(order.order_date).toLocaleDateString();
       acc[date] = (acc[date] || 0) + parseFloat(order.total_amount);
       return acc;
     }, {});
-    
+
     const chartData = Object.entries(dailyRevenue).map(([date, revenue]) => ({
-      date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      revenue
+      date: new Date(date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      revenue,
     }));
 
     // Order status distribution
     const statusData = [
-      { name: 'Delivered', value: completedOrders, color: '#10B981' },
-      { name: 'Processing', value: orders.filter(o => o.status === 'Processing').length, color: '#3B82F6' },
-      { name: 'Shipped', value: orders.filter(o => o.status === 'Shipped').length, color: '#8B5CF6' },
-      { name: 'Pending', value: pendingOrders, color: '#F59E0B' },
-      { name: 'Cancelled', value: cancelledOrders, color: '#EF4444' }
-    ].filter(item => item.value > 0);
+      { name: "Delivered", value: completedOrders, color: "#10B981" },
+      {
+        name: "Processing",
+        value: orders.filter((o) => o.status === "Processing").length,
+        color: "#3B82F6",
+      },
+      {
+        name: "Shipped",
+        value: orders.filter((o) => o.status === "Shipped").length,
+        color: "#8B5CF6",
+      },
+      { name: "Pending", value: pendingOrders, color: "#F59E0B" },
+      { name: "Cancelled", value: cancelledOrders, color: "#EF4444" },
+    ].filter((item) => item.value > 0);
 
     return {
       totalRevenue,
@@ -201,26 +142,33 @@ const AdminDashboard = () => {
       cancelledOrders,
       avgOrderValue,
       chartData,
-      statusData
+      statusData,
     };
   }, [orders]);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
     }).format(amount);
   };
 
   const toggleCard = (cardName) => {
-    setExpandedCards(prev => ({
+    setExpandedCards((prev) => ({
       ...prev,
-      [cardName]: !prev[cardName]
+      [cardName]: !prev[cardName],
     }));
   };
 
-  const StatCard = ({ title, value, icon: Icon, growth, color, description }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    growth,
+    color,
+    description,
+  }) => (
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -236,16 +184,32 @@ const AdminDashboard = () => {
           </div>
         </div>
         {growth !== undefined && (
-          <div className={`flex items-center space-x-1 ${growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {growth >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-            <span className="text-sm font-medium">{Math.abs(growth).toFixed(1)}%</span>
+          <div
+            className={`flex items-center space-x-1 ${
+              growth >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {growth >= 0 ? (
+              <TrendingUp size={16} />
+            ) : (
+              <TrendingDown size={16} />
+            )}
+            <span className="text-sm font-medium">
+              {Math.abs(growth).toFixed(1)}%
+            </span>
           </div>
         )}
       </div>
     </div>
   );
 
-  const CollapsibleSection = ({ title, children, isExpanded, onToggle, count }) => (
+  const CollapsibleSection = ({
+    title,
+    children,
+    isExpanded,
+    onToggle,
+    count,
+  }) => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
       <button
         onClick={onToggle}
@@ -261,12 +225,8 @@ const AdminDashboard = () => {
         </div>
         {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </button>
-      
-      {isExpanded && (
-        <div className="border-t border-gray-100">
-          {children}
-        </div>
-      )}
+
+      {isExpanded && <div className="border-t border-gray-100">{children}</div>}
     </div>
   );
 
@@ -293,10 +253,14 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your store.</p>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                Dashboard
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Welcome back! Here's what's happening with your store.
+              </p>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <select
                 value={selectedPeriod}
@@ -315,7 +279,7 @@ const AdminDashboard = () => {
         <CollapsibleSection
           title="Overview"
           isExpanded={expandedCards.overview}
-          onToggle={() => toggleCard('overview')}
+          onToggle={() => toggleCard("overview")}
         >
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -327,7 +291,7 @@ const AdminDashboard = () => {
                 color="bg-gradient-to-r from-blue-500 to-blue-600"
                 description="All time earnings"
               />
-              
+
               <StatCard
                 title="Total Orders"
                 value={orders.length.toLocaleString()}
@@ -335,7 +299,7 @@ const AdminDashboard = () => {
                 color="bg-gradient-to-r from-green-500 to-green-600"
                 description={`${analytics.completedOrders} completed`}
               />
-              
+
               <StatCard
                 title="Products"
                 value={products.length.toLocaleString()}
@@ -343,7 +307,7 @@ const AdminDashboard = () => {
                 color="bg-gradient-to-r from-purple-500 to-purple-600"
                 description="Active inventory"
               />
-              
+
               <StatCard
                 title="Customers"
                 value={users.length.toLocaleString()}
@@ -357,20 +321,27 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Revenue Chart */}
               <div className="bg-gray-50 rounded-xl p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h4>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  Revenue Trend
+                </h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={analytics.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                       <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip formatter={(value) => [formatCurrency(value), 'Revenue']} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="revenue" 
-                        stroke="#3B82F6" 
+                      <Tooltip
+                        formatter={(value) => [
+                          formatCurrency(value),
+                          "Revenue",
+                        ]}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#3B82F6"
                         strokeWidth={3}
-                        dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                        dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -379,7 +350,9 @@ const AdminDashboard = () => {
 
               {/* Order Status Distribution */}
               <div className="bg-gray-50 rounded-xl p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">Order Status</h4>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  Order Status
+                </h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -403,8 +376,13 @@ const AdminDashboard = () => {
                 <div className="flex flex-wrap gap-3 mt-4">
                   {analytics.statusData.map((item, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                      <span className="text-sm text-gray-600">{item.name} ({item.value})</span>
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
+                      <span className="text-sm text-gray-600">
+                        {item.name} ({item.value})
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -419,7 +397,7 @@ const AdminDashboard = () => {
             title="Recent Orders"
             count={orders.length}
             isExpanded={expandedCards.orders}
-            onToggle={() => toggleCard('orders')}
+            onToggle={() => toggleCard("orders")}
           >
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -447,12 +425,15 @@ const AdminDashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {orders.slice(0, 10).map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={order.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div>
                             <div className="text-sm font-medium text-blue-600">
-                              #{order.id.toString().padStart(4, '0')}
+                              #{order.id.toString().padStart(4, "0")}
                             </div>
                             <div className="text-xs text-gray-500">
                               <MapPin size={12} className="inline mr-1" />
@@ -487,24 +468,26 @@ const AdminDashboard = () => {
                         </div>
                         <div className="text-xs text-gray-500 flex items-center">
                           <Clock size={12} className="mr-1" />
-                          {new Date(order.order_date).toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
+                          {new Date(order.order_date).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
                           })}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          order.status === "Delivered" 
-                            ? "bg-green-100 text-green-800"
-                            : order.status === "Processing"
-                            ? "bg-blue-100 text-blue-800"
-                            : order.status === "Shipped"
-                            ? "bg-purple-100 text-purple-800"
-                            : order.status === "Cancelled"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            order.status === "Delivered"
+                              ? "bg-green-100 text-green-800"
+                              : order.status === "Processing"
+                              ? "bg-blue-100 text-blue-800"
+                              : order.status === "Shipped"
+                              ? "bg-purple-100 text-purple-800"
+                              : order.status === "Cancelled"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
                           {order.status}
                         </span>
                       </td>
@@ -523,14 +506,13 @@ const AdminDashboard = () => {
             </div>
           </CollapsibleSection>
         </div>
-
         {/* Customer Activity */}
         <div className="mt-6">
           <CollapsibleSection
             title="Customer Activity"
             count={users.length}
             isExpanded={expandedCards.customers}
-            onToggle={() => toggleCard('customers')}
+            onToggle={() => toggleCard("customers")}
           >
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -540,21 +522,21 @@ const AdminDashboard = () => {
                       <div className="flex-shrink-0">
                         <div className="h-12 w-12 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
                           <span className="text-lg font-semibold text-white">
-                            {customer.name.charAt(0)}
+                            {customer?.name?.charAt(0)}
                           </span>
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {customer.name}
+                          {customer.name ?? "Unknown User"}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
-                          {customer.email}
+                          {customer.email ?? customer.phone}
                         </p>
                         <div className="flex items-center mt-1">
                           <Star size={12} className="text-yellow-400 mr-1" />
                           <span className="text-xs text-gray-600">
-                            {customer.total_orders} orders
+                            {customer.totalOrders} orders
                           </span>
                         </div>
                       </div>
@@ -572,7 +554,7 @@ const AdminDashboard = () => {
             title="Product Inventory"
             count={products.length}
             isExpanded={expandedCards.products}
-            onToggle={() => toggleCard('products')}
+            onToggle={() => toggleCard("products")}
           >
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -583,15 +565,21 @@ const AdminDashboard = () => {
                         <h4 className="text-sm font-medium text-gray-900 truncate">
                           {product.name}
                         </h4>
-                        <p className="text-xs text-gray-500">{product.category}</p>
+                        <p className="text-xs text-gray-500">
+                          {product.category}
+                        </p>
                         <p className="text-sm font-semibold text-green-600 mt-1">
                           {formatCurrency(product.price)}
                         </p>
                       </div>
                       <div className="text-right">
-                        <div className={`text-xs font-medium ${
-                          product.stock < 30 ? 'text-red-600' : 'text-green-600'
-                        }`}>
+                        <div
+                          className={`text-xs font-medium ${
+                            product.stock < 30
+                              ? "text-red-600"
+                              : "text-green-600"
+                          }`}
+                        >
                           {product.stock} in stock
                         </div>
                       </div>
