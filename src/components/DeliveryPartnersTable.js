@@ -6,6 +6,7 @@ const DeliveryPartnersTable = () => {
   const [deliveryPartners, setDeliveryPartners] = useState([]);
   const [filteredPartners, setFilteredPartners] = useState([]);
   const [selectedPartner, setSelectedPartner] = useState(null);
+  const [showDocumentsModal, setShowDocumentsModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -15,47 +16,6 @@ const DeliveryPartnersTable = () => {
   const [showAreaAssignment, setShowAreaAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Mock data for demo - replace with your API call
-  const mockData = {
-    partners: [
-      {
-        id: 1,
-        name: "John Smith",
-        number: "+1234567890",
-        location: "Downtown",
-        status: "active",
-        deliveryStatus: "available",
-        assignedAreas: ["Zone A", "Zone B"],
-        documents: [
-          { document_type: "Driver License", document_url: "/docs/license1.pdf" },
-          { document_type: "Insurance", document_url: "/docs/insurance1.pdf" }
-        ]
-      },
-      {
-        id: 2,
-        name: "Sarah Johnson",
-        number: "+1234567891",
-        location: "Uptown",
-        status: "inactive",
-        deliveryStatus: "unavailable",
-        assignedAreas: ["Zone C"],
-        documents: []
-      },
-      {
-        id: 3,
-        name: "Mike Wilson",
-        number: "+1234567892",
-        location: "Downtown",
-        status: "active",
-        deliveryStatus: "busy",
-        assignedAreas: ["Zone A", "Zone D"],
-        documents: [
-          { document_type: "Driver License", document_url: "/docs/license3.pdf" }
-        ]
-      }
-    ]
-  };
 
   useEffect(() => {
     const fetchDeliveryPartners = async () => {
@@ -97,6 +57,12 @@ const DeliveryPartnersTable = () => {
 
   const handleViewDocuments = (partner) => {
     setSelectedPartner(partner);
+    setShowDocumentsModal(true);
+  };
+
+  const closeDocumentsModal = () => {
+    setShowDocumentsModal(false);
+    setSelectedPartner(null);
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -318,9 +284,9 @@ const DeliveryPartnersTable = () => {
                 <td colSpan="9" className="px-6 py-4 text-center text-sm">
                   No delivery partners found matching the current filters.
                 </td>
-                </tr>
-              )}
-            </tbody>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
 
@@ -366,42 +332,48 @@ const DeliveryPartnersTable = () => {
         </div>
       )}
 
-      {/* Documents section */}
-      {selectedPartner && (
-        <div className="mt-4 p-4 border-t bg-gray-50">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-semibold">
-              Documents for {selectedPartner.name}
-            </h3>
-            <button
-              onClick={() => setSelectedPartner(null)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X size={20} />
-            </button>
-          </div>
-          
-          {selectedPartner.documents && selectedPartner.documents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {selectedPartner.documents.map((doc, index) => (
-                <div key={index} className="bg-white p-3 rounded border">
-                  <div className="font-medium text-sm text-gray-700">{doc.document_type}</div>
-                  <a
-                    href={`https://app.freshmoo.in${doc.document_url}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline text-sm hover:text-blue-800"
-                  >
-                    View Document
-                  </a>
+      {/* Documents Modal */}
+      {showDocumentsModal && selectedPartner && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-96 overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">
+                Documents for {selectedPartner.name}
+              </h3>
+              <button
+                onClick={closeDocumentsModal}
+                className="text-gray-500 hover:text-gray-700 p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4">
+              {selectedPartner.documents && selectedPartner.documents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {selectedPartner.documents.map((doc, index) => (
+                    <div key={index} className="bg-gray-50 p-4 rounded-lg border">
+                      <div className="font-medium text-sm text-gray-700 mb-2">
+                        {doc.document_type}
+                      </div>
+                      <a
+                        href={`https://app.freshmoo.in${doc.document_url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                      >
+                        View Document
+                      </a>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <p>No documents available for this partner</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center text-gray-500 py-4">
-              <p>No documents available for this partner</p>
-            </div>
-          )}
+          </div>
         </div>
       )}
     </div>

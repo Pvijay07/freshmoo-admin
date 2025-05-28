@@ -57,9 +57,7 @@ const OrdersTable = () => {
     "All",
     "Pending",
     "Processing",
-    "Out for Delivery",
     "Delivered",
-    "Missed",
     "Cancelled",
   ];
 
@@ -104,7 +102,7 @@ const OrdersTable = () => {
         order.email.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus =
-        filterStatus === "All" || order.status === filterStatus;
+        filterStatus === "All" || order.status === filterStatus.toLowerCase();
 
       const matchesDateRange =
         (!startDate || new Date(order.order_date) >= startDate) &&

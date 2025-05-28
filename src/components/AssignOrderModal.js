@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { MoreHorizontal, Check } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { assignOrder, getOrderAssignee } from "../api"; // Assuming you have an API to fetch the current assignee
+import { assignOrder, getOrderAssignee } from "../api";
 
 const AssigneeDropdown = ({ assignees, orderId }) => {
   const [selectedAssignee, setSelectedAssignee] = useState(null);
