@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Search, Filter, Download, Eye, Calendar, X } from "lucide-react";
+import { Search, Filter, Download, Eye, X } from "lucide-react";
+import { getTransactions } from "../api";
 
 const TransactionsTable = () => {
   const [transactions, setTransactions] = useState([]);
@@ -8,111 +9,31 @@ const TransactionsTable = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const [filters, setFilters] = useState({
     dateFrom: "",
     dateTo: "",
     transactionType: "all",
     paymentStatus: "all",
     paymentMethod: "all",
-    customerSearch: ""
+    customerSearch: "",
   });
 
-  // Mock transaction data
-  const mockTransactions = [
-    {
-      id: "TXN001",
-      date: "2024-01-15",
-      time: "14:30:25",
-      customerName: "John Doe",
-      customerPhone: "+91-9876543210",
-      transactionType: "Wallet Top-up",
-      amount: 500,
-      paymentStatus: "Success",
-      paymentMethod: "UPI",
-      orderId: "ORD001",
-      referenceId: "REF123456789",
-      description: "Wallet recharge via UPI"
-    },
-    {
-      id: "TXN002",
-      date: "2024-01-15",
-      time: "15:45:12",
-      customerName: "Sarah Johnson",
-      customerPhone: "+91-9876543211",
-      transactionType: "Order Payment",
-      amount: 1250,
-      paymentStatus: "Success",
-      paymentMethod: "Card",
-      orderId: "ORD002",
-      referenceId: "REF123456790",
-      description: "Payment for order #ORD002"
-    },
-    {
-      id: "TXN003",
-      date: "2024-01-14",
-      time: "10:20:45",
-      customerName: "Mike Wilson",
-      customerPhone: "+91-9876543212",
-      transactionType: "Refund",
-      amount: -350,
-      paymentStatus: "Refunded",
-      paymentMethod: "Razorpay",
-      orderId: "ORD003",
-      referenceId: "REF123456791",
-      description: "Refund for cancelled order"
-    },
-    {
-      id: "TXN004",
-      date: "2024-01-14",
-      time: "16:15:30",
-      customerName: "Emily Davis",
-      customerPhone: "+91-9876543213",
-      transactionType: "Cashback",
-      amount: 75,
-      paymentStatus: "Success",
-      paymentMethod: "Wallet",
-      orderId: "ORD004",
-      referenceId: "REF123456792",
-      description: "Cashback for successful order"
-    },
-    {
-      id: "TXN005",
-      date: "2024-01-13",
-      time: "12:05:18",
-      customerName: "David Brown",
-      customerPhone: "+91-9876543214",
-      transactionType: "Order Payment",
-      amount: 890,
-      paymentStatus: "Failed",
-      paymentMethod: "UPI",
-      orderId: "ORD005",
-      referenceId: "REF123456793",
-      description: "Payment failed - insufficient funds"
-    },
-    {
-      id: "TXN006",
-      date: "2024-01-13",
-      time: "18:30:42",
-      customerName: "Lisa Anderson",
-      customerPhone: "+91-9876543215",
-      transactionType: "Order Payment",
-      amount: 2100,
-      paymentStatus: "Success",
-      paymentMethod: "COD",
-      orderId: "ORD006",
-      referenceId: "REF123456794",
-      description: "Cash on delivery payment"
-    }
-  ];
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setTransactions(mockTransactions);
-      setFilteredTransactions(mockTransactions);
-      setLoading(false);
-    }, 1000);
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        const data = await getTransactions();
+        setTransactions(data.transactions);
+        setFilteredTransactions(data.transactions);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
   // Filter logic
@@ -121,44 +42,52 @@ const TransactionsTable = () => {
 
     // Date range filter
     if (filters.dateFrom) {
-      filtered = filtered.filter(txn => txn.date >= filters.dateFrom);
+      filtered = filtered.filter((txn) => txn.date >= filters.dateFrom);
     }
     if (filters.dateTo) {
-      filtered = filtered.filter(txn => txn.date <= filters.dateTo);
+      filtered = filtered.filter((txn) => txn.date <= filters.dateTo);
     }
 
     // Transaction type filter
     if (filters.transactionType !== "all") {
-      filtered = filtered.filter(txn => txn.transactionType === filters.transactionType);
+      filtered = filtered.filter(
+        (txn) => txn.transactionType === filters.transactionType
+      );
     }
 
     // Payment status filter
     if (filters.paymentStatus !== "all") {
-      filtered = filtered.filter(txn => txn.paymentStatus === filters.paymentStatus);
+      filtered = filtered.filter(
+        (txn) => txn.paymentStatus === filters.paymentStatus
+      );
     }
 
     // Payment method filter
     if (filters.paymentMethod !== "all") {
-      filtered = filtered.filter(txn => txn.paymentMethod === filters.paymentMethod);
+      filtered = filtered.filter(
+        (txn) => txn.paymentMethod === filters.paymentMethod
+      );
     }
 
     // Customer search filter
     if (filters.customerSearch) {
       const searchLower = filters.customerSearch.toLowerCase();
-      filtered = filtered.filter(txn => 
-        txn.customerName.toLowerCase().includes(searchLower) ||
-        txn.customerPhone.includes(filters.customerSearch)
+      filtered = filtered.filter(
+        (txn) =>
+          txn.customerName.toLowerCase().includes(searchLower) ||
+          txn.customerPhone.includes(filters.customerSearch)
       );
     }
 
     // General search
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(txn =>
-        txn.id.toLowerCase().includes(searchLower) ||
-        txn.customerName.toLowerCase().includes(searchLower) ||
-        txn.transactionType.toLowerCase().includes(searchLower) ||
-        txn.orderId.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        (txn) =>
+          txn.id.toLowerCase().includes(searchLower) ||
+          txn.customerName.toLowerCase().includes(searchLower) ||
+          txn.transactionType.toLowerCase().includes(searchLower) ||
+          txn.orderId.toLowerCase().includes(searchLower)
       );
     }
 
@@ -166,9 +95,9 @@ const TransactionsTable = () => {
   }, [filters, transactions, searchTerm]);
 
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [filterType]: value
+      [filterType]: value,
     }));
   };
 
@@ -179,7 +108,7 @@ const TransactionsTable = () => {
       transactionType: "all",
       paymentStatus: "all",
       paymentMethod: "all",
-      customerSearch: ""
+      customerSearch: "",
     });
     setSearchTerm("");
   };
@@ -187,11 +116,11 @@ const TransactionsTable = () => {
   const getStatusBadge = (status) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (status) {
-      case 'Success':
+      case "Success":
         return `${baseClasses} bg-green-100 text-green-800`;
-      case 'Failed':
+      case "Failed":
         return `${baseClasses} bg-red-100 text-red-800`;
-      case 'Refunded':
+      case "Refunded":
         return `${baseClasses} bg-blue-100 text-blue-800`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800`;
@@ -201,13 +130,13 @@ const TransactionsTable = () => {
   const getTransactionTypeBadge = (type) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (type) {
-      case 'Wallet Top-up':
+      case "Wallet Top-up":
         return `${baseClasses} bg-purple-100 text-purple-800`;
-      case 'Order Payment':
+      case "Subscription payment":
         return `${baseClasses} bg-blue-100 text-blue-800`;
-      case 'Refund':
+      case "Refund":
         return `${baseClasses} bg-orange-100 text-orange-800`;
-      case 'Cashback':
+      case "Cashback":
         return `${baseClasses} bg-green-100 text-green-800`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800`;
@@ -215,37 +144,49 @@ const TransactionsTable = () => {
   };
 
   const getAmountColor = (amount, type) => {
-    if (type === 'Refund' || amount < 0) return 'text-red-600';
-    if (type === 'Cashback' || type === 'Wallet Top-up') return 'text-green-600';
-    return 'text-gray-900';
+    if (type === "Refund" || amount < 0) return "text-red-600";
+    if (type === "Cashback" || type === "Wallet Top-up")
+      return "text-green-600";
+    return "text-gray-900";
   };
 
   const formatAmount = (amount) => {
-    return `₹${Math.abs(amount).toLocaleString('en-IN')}`;
+    return `₹${Math.abs(amount).toLocaleString("en-IN")}`;
   };
 
   const exportTransactions = () => {
     // Simple CSV export
-    const headers = ['Transaction ID', 'Date', 'Customer Name', 'Phone', 'Type', 'Amount', 'Status', 'Method'];
+    const headers = [
+      "Transaction ID",
+      "Date",
+      "Customer Name",
+      "Phone",
+      "Type",
+      "Amount",
+      "Status",
+      "Method",
+    ];
     const csvContent = [
-      headers.join(','),
-      ...filteredTransactions.map(txn => [
-        txn.id,
-        `${txn.date} ${txn.time}`,
-        txn.customerName,
-        txn.customerPhone,
-        txn.transactionType,
-        txn.amount,
-        txn.paymentStatus,
-        txn.paymentMethod
-      ].join(','))
-    ].join('\n');
+      headers.join(","),
+      ...filteredTransactions.map((txn) =>
+        [
+          txn.id,
+          `${txn.date} ${txn.time}`,
+          txn.customerName,
+          txn.customerPhone,
+          txn.transactionType,
+          txn.amount,
+          txn.paymentStatus,
+          txn.paymentMethod,
+        ].join(",")
+      ),
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'transactions.csv';
+    a.download = "transactions.csv";
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -267,11 +208,14 @@ const TransactionsTable = () => {
           <h1 className="text-lg md:text-xl font-semibold text-gray-800">
             Transactions ({filteredTransactions.length})
           </h1>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Search Bar */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={16}
+              />
               <input
                 type="text"
                 placeholder="Search transactions..."
@@ -280,7 +224,7 @@ const TransactionsTable = () => {
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64"
               />
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex gap-2">
               <button
@@ -290,7 +234,7 @@ const TransactionsTable = () => {
                 <Filter size={16} />
                 Filters
               </button>
-              
+
               <button
                 onClick={exportTransactions}
                 className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -308,43 +252,57 @@ const TransactionsTable = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Date Range */}
               <div className="lg:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date From
+                </label>
                 <input
                   type="date"
                   value={filters.dateFrom}
-                  onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("dateFrom", e.target.value)
+                  }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
               </div>
-              
+
               <div className="lg:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date To
+                </label>
                 <input
                   type="date"
                   value={filters.dateTo}
-                  onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                  onChange={(e) => handleFilterChange("dateTo", e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
               </div>
 
               {/* Customer Search */}
               <div className="lg:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name/Phone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Customer Name/Phone
+                </label>
                 <input
                   type="text"
                   placeholder="Enter name or phone"
                   value={filters.customerSearch}
-                  onChange={(e) => handleFilterChange('customerSearch', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("customerSearch", e.target.value)
+                  }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
               </div>
 
               {/* Transaction Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Transaction Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Transaction Type
+                </label>
                 <select
                   value={filters.transactionType}
-                  onChange={(e) => handleFilterChange('transactionType', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("transactionType", e.target.value)
+                  }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 >
                   <option value="all">All Types</option>
@@ -357,10 +315,14 @@ const TransactionsTable = () => {
 
               {/* Payment Status */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Payment Status
+                </label>
                 <select
                   value={filters.paymentStatus}
-                  onChange={(e) => handleFilterChange('paymentStatus', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("paymentStatus", e.target.value)
+                  }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 >
                   <option value="all">All Status</option>
@@ -372,10 +334,14 @@ const TransactionsTable = () => {
 
               {/* Payment Method */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Payment Method
+                </label>
                 <select
                   value={filters.paymentMethod}
-                  onChange={(e) => handleFilterChange('paymentMethod', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("paymentMethod", e.target.value)
+                  }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 >
                   <option value="all">All Methods</option>
@@ -387,7 +353,7 @@ const TransactionsTable = () => {
                 </select>
               </div>
             </div>
-            
+
             <div className="mt-4 flex justify-end">
               <button
                 onClick={clearFilters}
@@ -405,8 +371,20 @@ const TransactionsTable = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 hidden md:table-header-group">
             <tr>
-              {['Transaction ID', 'Date & Time', 'Customer', 'Type', 'Amount', 'Status', 'Method', 'Actions'].map((header) => (
-                <th key={header} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {[
+                "Transaction ID",
+                "Date & Time",
+                "Customer",
+                "Type",
+                "Amount",
+                "Status",
+                "Method",
+                "Actions",
+              ].map((header) => (
+                <th
+                  key={header}
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
                   {header}
                 </th>
               ))}
@@ -415,56 +393,97 @@ const TransactionsTable = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredTransactions.length > 0 ? (
               filteredTransactions.map((transaction) => (
-                <tr key={transaction.id} className="hover:bg-gray-50 flex flex-col md:table-row border-b md:border-0 px-4 py-4 md:px-0 md:py-0">
+                <tr
+                  key={transaction.id}
+                  className="hover:bg-gray-50 flex flex-col md:table-row border-b md:border-0 px-4 py-4 md:px-0 md:py-0"
+                >
                   <td className="md:table-cell px-4 py-3 text-sm font-medium text-gray-900">
-                    <span className="block md:hidden font-semibold text-gray-600">Transaction ID:</span>
+                    <span className="block md:hidden font-semibold text-gray-600">
+                      Transaction ID:
+                    </span>
                     {transaction.id}
                   </td>
-                  
+
                   <td className="md:table-cell px-4 py-3 text-sm text-gray-500">
-                    <span className="block md:hidden font-semibold text-gray-600">Date & Time:</span>
-                    <div>
-                      <div className="font-medium">{transaction.date}</div>
-                      <div className="text-xs text-gray-400">{transaction.time}</div>
+                    <span className="block md:hidden font-semibold text-gray-600">
+                      Date & Time:
+                    </span>
+                    <div className="font-medium">
+                      {new Date(transaction.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {new Date(transaction.date).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
                     </div>
                   </td>
-                  
+
                   <td className="md:table-cell px-4 py-3 text-sm">
-                    <span className="block md:hidden font-semibold text-gray-600">Customer:</span>
+                    <span className="block md:hidden font-semibold text-gray-600">
+                      Customer:
+                    </span>
                     <div>
-                      <div className="font-medium text-gray-900">{transaction.customerName}</div>
-                      <div className="text-xs text-gray-500">{transaction.customerPhone}</div>
+                      <div className="font-medium text-gray-900">
+                        {transaction.customerName}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {transaction.customerPhone}
+                      </div>
                     </div>
                   </td>
-                  
+
                   <td className="md:table-cell px-4 py-3">
-                    <span className="block md:hidden font-semibold text-gray-600">Type:</span>
-                    <span className={getTransactionTypeBadge(transaction.transactionType)}>
+                    <span className="block md:hidden font-semibold text-gray-600">
+                      Type:
+                    </span>
+                    <span
+                      className={getTransactionTypeBadge(
+                        transaction.transactionType
+                      )}
+                    >
                       {transaction.transactionType}
                     </span>
                   </td>
-                  
+
                   <td className="md:table-cell px-4 py-3 text-sm">
-                    <span className="block md:hidden font-semibold text-gray-600">Amount:</span>
-                    <span className={`font-medium ${getAmountColor(transaction.amount, transaction.transactionType)}`}>
-                      {transaction.amount < 0 ? '-' : ''}{formatAmount(transaction.amount)}
+                    <span className="block md:hidden font-semibold text-gray-600">
+                      Amount:
+                    </span>
+                    <span
+                      className={`font-medium ${getAmountColor(
+                        transaction.amount,
+                        transaction.transactionType
+                      )}`}
+                    >
+                      {transaction.amount < 0 ? "-" : ""}
+                      {formatAmount(transaction.amount)}
                     </span>
                   </td>
-                  
+
                   <td className="md:table-cell px-4 py-3">
-                    <span className="block md:hidden font-semibold text-gray-600">Status:</span>
+                    <span className="block md:hidden font-semibold text-gray-600">
+                      Status:
+                    </span>
                     <span className={getStatusBadge(transaction.paymentStatus)}>
                       {transaction.paymentStatus}
                     </span>
                   </td>
-                  
+
                   <td className="md:table-cell px-4 py-3 text-sm text-gray-500">
-                    <span className="block md:hidden font-semibold text-gray-600">Method:</span>
+                    <span className="block md:hidden font-semibold text-gray-600">
+                      Method:
+                    </span>
                     <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
                       {transaction.paymentMethod}
                     </span>
                   </td>
-                  
+
                   <td className="md:table-cell px-4 py-3">
                     <button
                       onClick={() => setSelectedTransaction(transaction)}
@@ -504,74 +523,134 @@ const TransactionsTable = () => {
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Transaction ID</label>
-                    <p className="text-sm text-gray-900">{selectedTransaction.id}</p>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Transaction ID
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {selectedTransaction.id}
+                    </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Order ID</label>
-                    <p className="text-sm text-gray-900">{selectedTransaction.orderId}</p>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Order ID
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {selectedTransaction.orderId}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Date</label>
-                    <p className="text-sm text-gray-900">{selectedTransaction.date}</p>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Date
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {new Date(selectedTransaction.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Time</label>
-                    <p className="text-sm text-gray-900">{selectedTransaction.time}</p>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Time
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {new Date(selectedTransaction.date).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Customer</label>
-                  <p className="text-sm text-gray-900">{selectedTransaction.customerName}</p>
-                  <p className="text-sm text-gray-500">{selectedTransaction.customerPhone}</p>
+                  <label className="block text-sm font-medium text-gray-600">
+                    Customer
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {selectedTransaction.customerName}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {selectedTransaction.customerPhone}
+                  </p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Type</label>
-                    <span className={getTransactionTypeBadge(selectedTransaction.transactionType)}>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Type
+                    </label>
+                    <span
+                      className={getTransactionTypeBadge(
+                        selectedTransaction.transactionType
+                      )}
+                    >
                       {selectedTransaction.transactionType}
                     </span>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Amount</label>
-                    <p className={`text-sm font-medium ${getAmountColor(selectedTransaction.amount, selectedTransaction.transactionType)}`}>
-                      {selectedTransaction.amount < 0 ? '-' : ''}{formatAmount(selectedTransaction.amount)}
+                    <label className="block text-sm font-medium text-gray-600">
+                      Amount
+                    </label>
+                    <p
+                      className={`text-sm font-medium ${getAmountColor(
+                        selectedTransaction.amount,
+                        selectedTransaction.transactionType
+                      )}`}
+                    >
+                      {selectedTransaction.amount < 0 ? "-" : ""}
+                      {formatAmount(selectedTransaction.amount)}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Status</label>
-                    <span className={getStatusBadge(selectedTransaction.paymentStatus)}>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Status
+                    </label>
+                    <span
+                      className={getStatusBadge(
+                        selectedTransaction.paymentStatus
+                      )}
+                    >
                       {selectedTransaction.paymentStatus}
                     </span>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Payment Method</label>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Payment Method
+                    </label>
                     <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
                       {selectedTransaction.paymentMethod}
                     </span>
                   </div>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Reference ID</label>
-                  <p className="text-sm text-gray-900 font-mono">{selectedTransaction.referenceId}</p>
+                  <label className="block text-sm font-medium text-gray-600">
+                    Reference ID
+                  </label>
+                  <p className="text-sm text-gray-900 font-mono">
+                    {selectedTransaction.referenceId}
+                  </p>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Description</label>
-                  <p className="text-sm text-gray-900">{selectedTransaction.description}</p>
+                  <label className="block text-sm font-medium text-gray-600">
+                    Description
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {selectedTransaction.transactionType}
+                  </p>
                 </div>
               </div>
             </div>

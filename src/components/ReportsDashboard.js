@@ -4,12 +4,10 @@ import {
   ShoppingCart, 
   Package, 
   DollarSign, 
-  Calendar,
   Download,
   Filter,
-  Eye,
   BarChart3,
-  PieChart
+  IndianRupee,
 } from "lucide-react";
 import { 
   LineChart, 
@@ -28,13 +26,21 @@ import {
   AreaChart,
   Pie
 } from "recharts";
+import { getdailyRevenue, getOrderStatus, getOverview, getProductTypes, getSalesTrends, getTopProducts } from "../api";
 
 const ReportsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDateRange, setSelectedDateRange] = useState("7d");
   const [selectedReportType, setSelectedReportType] = useState("overview");
   const [showFilters, setShowFilters] = useState(false);
-  
+  const [overview, setOverview] = useState(null);
+  const [dailyRevenue, setDailyRevenue] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [orderStatus, setOrderStatus] = useState([]);
+  const [salesTrends, setSalesTrends] = useState([]);
+  const [error, setError] = useState(null);
+
   const [filters, setFilters] = useState({
     dateFrom: "",
     dateTo: "",
@@ -42,67 +48,63 @@ const ReportsDashboard = () => {
     orderStatus: "all"
   });
 
-  // Mock data for different report types
-  const mockData = {
-    overview: {
-      totalRevenue: 125000,
-      totalOrders: 1250,
-      totalProducts: 45,
-      avgOrderValue: 100,
-      revenueGrowth: 12.5,
-      ordersGrowth: 8.3,
-      productsGrowth: 15.2,
-      avgOrderGrowth: 4.1
-    },
-    
-    dailyRevenue: [
-      { date: "Jan 01", revenue: 12000, orders: 120, avgOrder: 100 },
-      { date: "Jan 02", revenue: 15000, orders: 140, avgOrder: 107 },
-      { date: "Jan 03", revenue: 18000, orders: 160, avgOrder: 113 },
-      { date: "Jan 04", revenue: 14000, orders: 130, avgOrder: 108 },
-      { date: "Jan 05", revenue: 20000, orders: 180, avgOrder: 111 },
-      { date: "Jan 06", revenue: 22000, orders: 190, avgOrder: 116 },
-      { date: "Jan 07", revenue: 25000, orders: 200, avgOrder: 125 }
-    ],
-    
-    productTypes: [
-      { name: "Vegetables", value: 35, revenue: 43750, orders: 437, color: "#22C55E" },
-      { name: "Fruits", value: 28, revenue: 35000, orders: 350, color: "#F59E0B" },
-      { name: "Dairy", value: 20, revenue: 25000, orders: 250, color: "#3B82F6" },
-      { name: "Meat", value: 12, revenue: 15000, orders: 150, color: "#EF4444" },
-      { name: "Bakery", value: 5, revenue: 6250, orders: 63, color: "#8B5CF6" }
-    ],
-    
-    topProducts: [
-      { name: "Organic Tomatoes", sales: 450, revenue: 9000, category: "Vegetables" },
-      { name: "Fresh Apples", sales: 380, revenue: 7600, category: "Fruits" },
-      { name: "Whole Milk", sales: 320, revenue: 6400, category: "Dairy" },
-      { name: "Chicken Breast", sales: 280, revenue: 8400, category: "Meat" },
-      { name: "Bananas", sales: 250, revenue: 3750, category: "Fruits" }
-    ],
-    
-    orderStatus: [
-      { status: "Delivered", count: 890, percentage: 71.2, color: "#22C55E" },
-      { status: "Processing", count: 180, percentage: 14.4, color: "#F59E0B" },
-      { status: "Shipped", count: 120, percentage: 9.6, color: "#3B82F6" },
-      { status: "Cancelled", count: 60, percentage: 4.8, color: "#EF4444" }
-    ],
-    
-    salesTrends: [
-      { month: "Jul", sales: 85000, target: 80000 },
-      { month: "Aug", sales: 92000, target: 85000 },
-      { month: "Sep", sales: 98000, target: 90000 },
-      { month: "Oct", sales: 105000, target: 95000 },
-      { month: "Nov", sales: 115000, target: 100000 },
-      { month: "Dec", sales: 125000, target: 110000 }
-    ]
-  };
-
   useEffect(() => {
-    // Simulate API loading
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [
+          overviewRes,
+          dailyRevenueRes,
+          productTypesRes,
+          topProductsRes,
+          orderStatusRes,
+          salesTrendsRes
+        ] = await Promise.all([
+          getOverview(),
+          getdailyRevenue(),
+          getProductTypes(),
+          getTopProducts(),
+          getOrderStatus(),
+          getSalesTrends()
+        ]);
+        
+        // if (!overviewRes.ok || !dailyRevenueRes.ok || !productTypesRes.ok || 
+        //     !topProductsRes.ok || !orderStatusRes.ok || !salesTrendsRes.ok) {
+        //   throw new Error('Failed to fetch dashboard data');
+        // }
+
+        const [
+          overviewData,
+          dailyRevenueData,
+          productTypesData,
+          topProductsData,
+          orderStatusData,
+          salesTrendsData
+        ] = await Promise.all([
+          overviewRes,
+          dailyRevenueRes,
+          productTypesRes,
+          topProductsRes,
+          orderStatusRes,
+          salesTrendsRes
+        ]);
+
+        setOverview(overviewData.overview);
+        setDailyRevenue(dailyRevenueData.dailyRevenue);
+        setProductTypes(productTypesData.productTypes);
+        setTopProducts(topProductsData.topProducts);
+        setOrderStatus(orderStatusData.orderStatus);
+        setSalesTrends(salesTrendsData.salesTrends);
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   const StatCard = ({ title, value, growth, icon: Icon, color }) => (
@@ -132,12 +134,12 @@ const ReportsDashboard = () => {
     
     if (selectedReportType === "revenue") {
       reportData.push(['Date', 'Revenue', 'Orders', 'Avg Order Value']);
-      mockData.dailyRevenue.forEach(item => {
+      dailyRevenue.forEach(item => {
         reportData.push([item.date, item.revenue, item.orders, item.avgOrder]);
       });
     } else if (selectedReportType === "products") {
       reportData.push(['Product Type', 'Revenue', 'Orders', 'Percentage']);
-      mockData.productTypes.forEach(item => {
+      productTypes.forEach(item => {
         reportData.push([item.name, item.revenue, item.orders, item.value + '%']);
       });
     }
@@ -163,6 +165,21 @@ const ReportsDashboard = () => {
             ))}
           </div>
           <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="text-red-600">
+              <h3 className="text-lg font-medium">Error loading dashboard</h3>
+              <p className="mt-1 text-sm">{error}</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -287,34 +304,34 @@ const ReportsDashboard = () => {
 
         <div className="p-6">
           {/* Overview Tab */}
-          {selectedReportType === "overview" && (
+          {selectedReportType === "overview" && overview && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                   title="Total Revenue"
-                  value={`₹${mockData.overview.totalRevenue.toLocaleString()}`}
-                  growth={mockData.overview.revenueGrowth}
-                  icon={DollarSign}
+                  value={`₹${overview.totalRevenue?.toLocaleString() || '0'}`}
+                  growth={overview.revenueGrowth}
+                  icon={IndianRupee}
                   color="bg-green-500"
                 />
                 <StatCard
                   title="Total Orders"
-                  value={mockData.overview.totalOrders.toLocaleString()}
-                  growth={mockData.overview.ordersGrowth}
+                  value={overview.totalOrders?.toLocaleString() || '0'}
+                  growth={overview.ordersGrowth}
                   icon={ShoppingCart}
                   color="bg-blue-500"
                 />
                 <StatCard
                   title="Products Sold"
-                  value={mockData.overview.totalProducts.toLocaleString()}
-                  growth={mockData.overview.productsGrowth}
+                  value={overview.totalProducts?.toLocaleString() || '0'}
+                  growth={overview.productsGrowth}
                   icon={Package}
                   color="bg-purple-500"
                 />
                 <StatCard
                   title="Avg Order Value"
-                  value={`₹${mockData.overview.avgOrderValue}`}
-                  growth={mockData.overview.avgOrderGrowth}
+                  value={`₹${overview.avgOrderValue || '0'}`}
+                  growth={overview.avgOrderGrowth}
                   icon={TrendingUp}
                   color="bg-orange-500"
                 />
@@ -325,7 +342,7 @@ const ReportsDashboard = () => {
                 <h3 className="text-lg font-semibold mb-4">Sales vs Target</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={mockData.salesTrends}>
+                    <BarChart data={salesTrends}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -347,7 +364,7 @@ const ReportsDashboard = () => {
                 <h3 className="text-lg font-semibold mb-4">Daily Revenue Trend</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={mockData.dailyRevenue}>
+                    <AreaChart data={dailyRevenue}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
@@ -369,7 +386,7 @@ const ReportsDashboard = () => {
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <h3 className="text-lg font-semibold mb-4">Revenue Breakdown</h3>
                   <div className="space-y-3">
-                    {mockData.productTypes.map((type, index) => (
+                    {productTypes.map((type, index) => (
                       <div key={index} className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div 
@@ -378,7 +395,7 @@ const ReportsDashboard = () => {
                           ></div>
                           <span className="font-medium">{type.name}</span>
                         </div>
-                        <span className="text-gray-600">₹{type.revenue.toLocaleString()}</span>
+                        <span className="text-gray-600">₹{type.revenue?.toLocaleString() || '0'}</span>
                       </div>
                     ))}
                   </div>
@@ -387,14 +404,14 @@ const ReportsDashboard = () => {
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <h3 className="text-lg font-semibold mb-4">Top Revenue Days</h3>
                   <div className="space-y-3">
-                    {mockData.dailyRevenue
-                      .sort((a, b) => b.revenue - a.revenue)
+                    {dailyRevenue
+                      .sort((a, b) => (b.revenue || 0) - (a.revenue || 0))
                       .slice(0, 5)
                       .map((day, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <span className="font-medium">{day.date}</span>
                           <span className="text-green-600 font-medium">
-                            ₹{day.revenue.toLocaleString()}
+                            ₹{day.revenue?.toLocaleString() || '0'}
                           </span>
                         </div>
                       ))}
@@ -414,14 +431,14 @@ const ReportsDashboard = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
                         <Pie
-                          data={mockData.orderStatus}
+                          data={orderStatus}
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
                           outerRadius={100}
                           dataKey="count"
                         >
-                          {mockData.orderStatus.map((entry, index) => (
+                          {orderStatus.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
@@ -434,7 +451,7 @@ const ReportsDashboard = () => {
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <h3 className="text-lg font-semibold mb-4">Order Status Details</h3>
                   <div className="space-y-4">
-                    {mockData.orderStatus.map((status, index) => (
+                    {orderStatus.map((status, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div 
@@ -457,7 +474,7 @@ const ReportsDashboard = () => {
                 <h3 className="text-lg font-semibold mb-4">Daily Orders Trend</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={mockData.dailyRevenue}>
+                    <LineChart data={dailyRevenue}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
@@ -486,13 +503,13 @@ const ReportsDashboard = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
                         <Pie
-                          data={mockData.productTypes}
+                          data={productTypes}
                           cx="50%"
                           cy="50%"
                           outerRadius={100}
                           dataKey="value"
                         >
-                          {mockData.productTypes.map((entry, index) => (
+                          {productTypes.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
@@ -506,7 +523,7 @@ const ReportsDashboard = () => {
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <h3 className="text-lg font-semibold mb-4">Category Revenue</h3>
                   <div className="space-y-4">
-                    {mockData.productTypes.map((type, index) => (
+                    {productTypes.map((type, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div 
@@ -516,8 +533,8 @@ const ReportsDashboard = () => {
                           <span className="font-medium">{type.name}</span>
                         </div>
                         <div className="text-right">
-                          <div className="font-semibold">₹{type.revenue.toLocaleString()}</div>
-                          <div className="text-sm text-gray-500">{type.orders} orders</div>
+                          <div className="font-semibold">₹{type.revenue?.toLocaleString() || '0'}</div>
+                          <div className="text-sm text-gray-500">{type.orders || 0} orders</div>
                         </div>
                       </div>
                     ))}
@@ -538,13 +555,13 @@ const ReportsDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {mockData.topProducts.map((product, index) => (
+                      {topProducts.map((product, index) => (
                         <tr key={index} className="border-b hover:bg-white">
                           <td className="py-3 px-4 font-medium">{product.name}</td>
                           <td className="py-3 px-4 text-gray-600">{product.category}</td>
                           <td className="py-3 px-4">{product.sales}</td>
                           <td className="py-3 px-4 font-semibold text-green-600">
-                            ₹{product.revenue.toLocaleString()}
+                            ₹{product.revenue?.toLocaleString() || '0'}
                           </td>
                         </tr>
                       ))}

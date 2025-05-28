@@ -37,9 +37,8 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    // Note: localStorage is not available in Claude.ai artifacts
-    // In a real app, you would use: localStorage.removeItem("isLoggedIn");
     console.log("Logout clicked");
+  
     setIsDropdownOpen(false);
   };
 
@@ -47,13 +46,12 @@ const Navbar = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       console.log("Searching for:", searchQuery);
-      // Implement search functionality here
     }
   };
 
   return (
     <>
-      <nav className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50">
+      <nav className="bg-indigo-900 text-white backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             

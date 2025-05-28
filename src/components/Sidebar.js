@@ -12,7 +12,7 @@ const Sidebar = () => {
   }
 
   return (
-    <div className={`bg-indigo-700 text-white backdrop-blur-sm ${
+    <div className={`bg-indigo-500 text-white backdrop-blur-sm ${
         isSidebarOpen ? "w-64" : "w-20"
       } transition-all duration-300 flex-shrink-0 md:block`}>
 

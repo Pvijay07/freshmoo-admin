@@ -188,7 +188,7 @@ export const getbanners = async () => {
   }
 };
 
-export const createBanner = async ( banner) => {
+export const createBanner = async (banner) => {
   try {
     const response = await api.post("/admin/createBanner", banner);
     return response.data;
@@ -228,7 +228,7 @@ export const getCoupons = async () => {
   }
 };
 
-export const createCoupon = async ( coupon) => {
+export const createCoupon = async (coupon) => {
   try {
     const response = await api.post("/admin/createCoupon", coupon);
     return response.data;
@@ -309,6 +309,73 @@ export const assignOrder = async (assignee, orderId) => {
 export const getOrderAssignee = async (orderId) => {
   try {
     const response = await api.get("/admin/getOrderAssignee/" + orderId);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+
+export const getTransactions = async () => {
+  try {
+    const response = await api.get("/admin/transactions/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+
+export const getOverview = async () => {
+  try {
+    const response = await api.get("/admin/overview");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+export const getdailyRevenue = async () => {
+  try {
+    const response = await api.get("/admin/daily-revenue");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+export const getProductTypes = async () => {
+  try {
+    const response = await api.get("/admin/product-types");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+export const getTopProducts = async () => {
+  try {
+    const response = await api.get("/admin/top-products");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+
+export const getOrderStatus = async () => {
+  try {
+    const response = await api.get("/admin/order-status");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    throw error;
+  }
+};
+
+export const getSalesTrends = async () => {
+  try {
+    const response = await api.get("/admin/sales-trends");
     return response.data;
   } catch (error) {
     console.error("Error fetching coupons:", error);
