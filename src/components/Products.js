@@ -85,6 +85,8 @@ const Products = () => {
   };
 
   const handleEditProduct = async (formData, productId) => {
+    console.log(productId)
+    // return
     try {
       const response = await fetch(
         `https://app.freshmoo.in/api/admin/updateProduct/${productId}`,
