@@ -42,7 +42,6 @@ const UsersTable = () => {
 
     fetchUsers();
   }, []);
-  console.log(users);
   // Apply filters
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -50,8 +49,8 @@ const UsersTable = () => {
       user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.number?.includes(searchQuery);
 
-    const matchesStatus = !filters.status || user.status === filters.status;
-    const matchesGender = !filters.gender || user.gender === filters.gender;
+    const matchesStatus = !filters.status.toLowerCase() || user.status === filters.status.toLowerCase();
+    const matchesGender = !filters.gender.toLowerCase() || user.gender === filters.gender.toLowerCase();
     const matchesSubscription =
       !filters.subscriptionStatus ||
       user.subscriptionStatus === filters.subscriptionStatus;
@@ -402,7 +401,7 @@ const UsersTable = () => {
                   <option value="">All Statuses</option>
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
-                  <option value="pending">Pending</option>
+                  {/* <option value="pending">Pending</option> */}
                 </select>
               </div>
 
@@ -443,7 +442,7 @@ const UsersTable = () => {
               </div>
 
               {/* Delivery Status Filter */}
-              <div>
+              {/* <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Delivery Status
                 </label>
@@ -460,7 +459,7 @@ const UsersTable = () => {
                   <option value="in_transit">In Transit</option>
                   <option value="failed">Failed</option>
                 </select>
-              </div>
+              </div> */}
 
               {/* Wallet Balance Range */}
               <div className="sm:col-span-2 lg:col-span-1">
@@ -619,7 +618,7 @@ const UsersTable = () => {
                 onClick={() => handleSort("deliveryStatus")}
               >
                 <div className="flex items-center">
-                  Delivery Status
+                  Delivery Instructions
                   {sortField === "deliveryStatus" &&
                     (sortDirection === "asc" ? (
                       <ChevronUp size={16} className="ml-1" />

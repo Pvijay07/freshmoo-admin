@@ -9,48 +9,39 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   );
   const [image, setImage] = useState(product ? product.image : "");
   const [recommandable, setRecommandable] = useState(
-    product ? product.recommandable : ""
+    product ? product.recommandable : false // Changed to boolean default
   );
-  const [actualPrice, setactualPrice] = useState(
-    product ? product.actual_price : 0
+  const [actualPrice, setActualPrice] = useState(
+    product ? product.actual_price : ""
   );
   const [categories, setCategories] = useState([]);
-  const [category, setCategory] = useState([]);
+  const [category, setCategory] = useState(product ? product.category_id : ""); // Fixed initialization
+  const [images, setImages] = useState([]);
+
+  // Effect to populate form when product changes
   useEffect(() => {
     if (product) {
-      setName(product.name);
-      setPrice(product.price);
-      setDescription(product.description);
-      setCategory(product.category_id);
-      setImage(product.image);
-      setactualPrice(product.actual_price)
+      setName(product.name || "");
+      setPrice(product.price || "");
+      setDescription(product.description || "");
+      setCategory(product.category_id || "");
+      setImage(product.image || "");
+      setActualPrice(product.actual_price || "");
+      setRecommandable(Boolean(product.recommandable)); // Ensure boolean
+    } else {
+      // Reset form for new product
+      setName("");
+      setPrice("");
+      setDescription("");
+      setCategory("");
+      setImage("");
+      setActualPrice("");
+      setRecommandable(false);
+      setImages([]);
     }
   }, [product]);
-  const [images, setImages] = useState([]);
-  const handleImageChange = (e) => {
-    const selectedFiles = Array.from(e.target.files); // Convert FileList to Array
-    setImages(selectedFiles);
-  };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // console.log(images);
-    const formData = new FormData();
 
-    formData.append("id", product?.id);
-    formData.append("category", category);
-    formData.append("name", name);
-    formData.append("price", price);
-    formData.append("actual_price", actualPrice);
-    formData.append("description", description);
-    formData.append("recommandable", recommandable ? 1 : 0);
-
-    // Append multiple images correctly
-    images.forEach((file, index) => {
-      formData.append(`files`, file); // Use array notation for multiple files
-    });
-    onSubmit(formData);
-  };
-
+  // Effect to fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -62,6 +53,31 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     };
     fetchCategories();
   }, []);
+
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setImages(selectedFiles);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append("id", product?.id);
+    formData.append("category", category);
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("actual_price", actualPrice);
+    formData.append("description", description);
+    formData.append("recommandable", recommandable ? 1 : 0);
+
+    // Append multiple images correctly
+    images.forEach((file) => {
+      formData.append(`files`, file);
+    });
+    
+    onSubmit(formData);
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -85,6 +101,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             ))}
           </select>
         </div>
+        
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Name</label>
           <input
@@ -96,17 +113,19 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             required
           />
         </div>
+        
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Actual Price</label>
           <input
             type="number"
             value={actualPrice}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => setActualPrice(e.target.value)} // Fixed: was updating price instead
             className="w-full p-2 border border-gray-300 rounded-lg"
             placeholder="Product Actual Price"
             required
           />
         </div>
+        
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
             Selling Price
@@ -120,6 +139,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             required
           />
         </div>
+        
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Images</label>
           <input
@@ -129,7 +149,13 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             accept="image/*"
             multiple
           />
+          {product && product.image && (
+            <p className="text-sm text-gray-500 mt-1">
+              Current image: {product.image}
+            </p>
+          )}
         </div>
+        
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Description</label>
           <textarea
@@ -141,11 +167,12 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             required
           />
         </div>
+        
         <div className="mb-4 flex items-center space-x-2">
           <label className="text-sm font-medium">Recommandable</label>
           <input
             type="checkbox"
-            checked={recommandable} // assuming description is a boolean now
+            checked={recommandable}
             onChange={(e) => setRecommandable(e.target.checked)}
             className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
           />
