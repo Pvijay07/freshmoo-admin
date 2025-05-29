@@ -18,11 +18,16 @@ buildscript {
 apply from: "variables.gradle"
 
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin") {
+                useVersion("1.8.22")
+                because("Force consistent Kotlin version to avoid duplicate class issues")
+            }
+        }
     }
 }
+
 
 task clean(type: Delete) {
     delete rootProject.buildDir

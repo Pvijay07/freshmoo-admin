@@ -16,46 +16,6 @@ const DeliveryPartnersTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Mock data for demo - replace with your API call
-  const mockData = {
-    partners: [
-      {
-        id: 1,
-        name: "John Smith",
-        number: "+1234567890",
-        location: "Downtown",
-        status: "active",
-        deliveryStatus: "available",
-        assignedAreas: ["Zone A", "Zone B"],
-        documents: [
-          { document_type: "Driver License", document_url: "/docs/license1.pdf" },
-          { document_type: "Insurance", document_url: "/docs/insurance1.pdf" }
-        ]
-      },
-      {
-        id: 2,
-        name: "Sarah Johnson",
-        number: "+1234567891",
-        location: "Uptown",
-        status: "inactive",
-        deliveryStatus: "unavailable",
-        assignedAreas: ["Zone C"],
-        documents: []
-      },
-      {
-        id: 3,
-        name: "Mike Wilson",
-        number: "+1234567892",
-        location: "Downtown",
-        status: "active",
-        deliveryStatus: "busy",
-        assignedAreas: ["Zone A", "Zone D"],
-        documents: [
-          { document_type: "Driver License", document_url: "/docs/license3.pdf" }
-        ]
-      }
-    ]
-  };
 
   useEffect(() => {
     const fetchDeliveryPartners = async () => {
